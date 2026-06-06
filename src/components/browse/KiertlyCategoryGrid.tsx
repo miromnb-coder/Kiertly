@@ -3,6 +3,9 @@ import { Image, Pressable, StyleSheet, Text, View, type ImageSourcePropType } fr
 import { theme } from '../../constants/theme';
 import type { HomeCategory } from '../home/KiertlyCategoryChips';
 
+const categoryImageBaseUrl =
+  'https://raw.githubusercontent.com/miromnb-coder/Kiertly/main/assets/categories';
+
 type BrowseCategory = {
   title: string;
   targetCategory: HomeCategory;
@@ -14,49 +17,49 @@ const categories: BrowseCategory[] = [
   {
     title: 'Työkalut',
     targetCategory: 'Lainaa',
-    image: require('../../../assets/categories/tools.PNG'),
+    image: { uri: `${categoryImageBaseUrl}/tools.PNG` },
     backgroundColor: '#F1E8D7',
   },
   {
     title: 'Retkeily',
     targetCategory: 'Lähellä',
-    image: require('../../../assets/categories/camping.PNG'),
+    image: { uri: `${categoryImageBaseUrl}/camping.PNG` },
     backgroundColor: '#EEF3E4',
   },
   {
     title: 'Matkailu',
     targetCategory: 'Vuokraa',
-    image: require('../../../assets/categories/travel.PNG'),
+    image: { uri: `${categoryImageBaseUrl}/travel.PNG` },
     backgroundColor: '#EFE5D6',
   },
   {
     title: 'Koti',
     targetCategory: 'Ilmaiset',
-    image: require('../../../assets/categories/home.PNG'),
+    image: { uri: `${categoryImageBaseUrl}/home.PNG` },
     backgroundColor: '#ECE8DC',
   },
   {
     title: 'Elektroniikka',
     targetCategory: 'Vuokraa',
-    image: require('../../../assets/categories/electronics.PNG'),
+    image: { uri: `${categoryImageBaseUrl}/electronics.PNG` },
     backgroundColor: '#E8E4D8',
   },
   {
     title: 'Juhlat',
     targetCategory: 'Vaihda',
-    image: require('../../../assets/categories/party.PNG'),
+    image: { uri: `${categoryImageBaseUrl}/party.PNG` },
     backgroundColor: '#F3E9D8',
   },
   {
     title: 'Viihde',
     targetCategory: 'Vaihda',
-    image: require('../../../assets/categories/entertainment.PNG'),
+    image: { uri: `${categoryImageBaseUrl}/entertainment.PNG` },
     backgroundColor: '#EEE7D8',
   },
   {
     title: 'Urheilu',
     targetCategory: 'Lähellä',
-    image: require('../../../assets/categories/sports.PNG'),
+    image: { uri: `${categoryImageBaseUrl}/sports.PNG` },
     backgroundColor: '#F0E7DA',
   },
 ];
