@@ -10,6 +10,7 @@ import {
   type HomeCategory,
 } from '../src/components/home/KiertlyCategoryChips';
 import { KiertlyItemGrid, type KiertlyGridItem } from '../src/components/home/KiertlyItemGrid';
+import { KiertlyItemDetailScreen } from '../src/components/item/KiertlyItemDetailScreen';
 import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
 import { KiertlySearchEmptyState } from '../src/components/search/KiertlySearchEmptyState';
 import { KiertlySearchHeader, type KiertlySearchMode } from '../src/components/search/KiertlySearchHeader';
@@ -24,6 +25,7 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<HomeCategory>('Kaikki');
   const [sharedItems, setSharedItems] = useState<KiertlyGridItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState<KiertlyGridItem | undefined>();
 
   function closeSearch() {
     setIsSearchOpen(false);
@@ -59,9 +61,17 @@ export default function HomeScreen() {
           activeCategory={activeCategory}
           onCategoryPress={setActiveCategory}
         />
-        <KiertlyItemGrid activeCategory={activeCategory} sharedItems={sharedItems} />
+        <KiertlyItemGrid
+          activeCategory={activeCategory}
+          sharedItems={sharedItems}
+          onItemPress={setSelectedItem}
+        />
       </ScrollView>
     );
+  }
+
+  if (selectedItem && !isSearchOpen) {
+    return <KiertlyItemDetailScreen item={selectedItem} onBack={() => setSelectedItem(undefined)} />;
   }
 
   if (activeTab === 'share' && !isSearchOpen) {
