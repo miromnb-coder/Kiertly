@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
 
@@ -8,6 +8,7 @@ type KiertlyFormRowProps = {
   value: string;
   rightText?: string;
   showChevron?: boolean;
+  onPress?: () => void;
 };
 
 export function KiertlyFormRow({
@@ -15,17 +16,25 @@ export function KiertlyFormRow({
   value,
   rightText,
   showChevron = false,
+  onPress,
 }: KiertlyFormRowProps) {
   return (
-    <View style={styles.row}>
+    <Pressable
+      accessibilityRole={onPress ? 'button' : undefined}
+      onPress={onPress}
+      disabled={!onPress}
+      style={styles.row}
+    >
       <View style={styles.textWrap}>
         <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{value}</Text>
+        <Text style={[styles.value, value !== 'Valitse kategoria' && value !== 'Valitse sijainti' && styles.selectedValue]}>
+          {value}
+        </Text>
       </View>
 
       {rightText ? <Text style={styles.rightText}>{rightText}</Text> : null}
       {showChevron ? <Feather name="chevron-right" size={26} color={theme.colors.text} /> : null}
-    </View>
+    </Pressable>
   );
 }
 
@@ -51,6 +60,10 @@ const styles = StyleSheet.create({
   value: {
     color: theme.colors.mutedText,
     fontSize: 16,
+  },
+  selectedValue: {
+    color: theme.colors.text,
+    fontWeight: '600',
   },
   rightText: {
     marginLeft: theme.spacing.md,
