@@ -64,6 +64,6 @@ const styles = StyleSheet.create({
   },
   searchContent: {
     flex: 1,
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.background,
   },
 });
