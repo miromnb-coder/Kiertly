@@ -14,6 +14,7 @@ import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
 import { KiertlySearchEmptyState } from '../src/components/search/KiertlySearchEmptyState';
 import { KiertlySearchHeader, type KiertlySearchMode } from '../src/components/search/KiertlySearchHeader';
 import { KiertlySearchTabs } from '../src/components/search/KiertlySearchTabs';
+import { KiertlyShareScreen } from '../src/components/share/KiertlyShareScreen';
 import { theme } from '../src/constants/theme';
 
 export default function HomeScreen() {
@@ -54,6 +55,10 @@ export default function HomeScreen() {
         <KiertlyItemGrid activeCategory={activeCategory} />
       </ScrollView>
     );
+  }
+
+  if (activeTab === 'share' && !isSearchOpen) {
+    return <KiertlyShareScreen onClose={() => setActiveTab('home')} />;
   }
 
   return (
