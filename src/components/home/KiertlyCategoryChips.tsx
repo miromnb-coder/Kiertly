@@ -1,27 +1,38 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
 import { theme } from '../../constants/theme';
 
-const categories = ['Kaikki', 'Lainaa', 'Vuokraa', 'Vaihda', 'Ilmaiset', 'Lähellä'];
+export const homeCategories = ['Kaikki', 'Lainaa', 'Vuokraa', 'Vaihda', 'Ilmaiset', 'Lähellä'] as const;
+
+export type HomeCategory = (typeof homeCategories)[number];
 
 type KiertlyCategoryChipsProps = {
-  activeCategory?: string;
+  activeCategory: HomeCategory;
+  onCategoryPress: (category: HomeCategory) => void;
 };
 
-export function KiertlyCategoryChips({ activeCategory = 'Kaikki' }: KiertlyCategoryChipsProps) {
+export function KiertlyCategoryChips({
+  activeCategory,
+  onCategoryPress,
+}: KiertlyCategoryChipsProps) {
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.content}
     >
-      {categories.map((category) => {
+      {homeCategories.map((category) => {
         const isActive = category === activeCategory;
 
         return (
-          <View key={category} style={[styles.chip, isActive && styles.activeChip]}>
+          <Pressable
+            key={category}
+            accessibilityRole="button"
+            onPress={() => onCategoryPress(category)}
+            style={[styles.chip, isActive && styles.activeChip]}
+          >
             <Text style={[styles.chipText, isActive && styles.activeChipText]}>{category}</Text>
-          </View>
+          </Pressable>
         );
       })}
     </ScrollView>
