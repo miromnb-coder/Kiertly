@@ -8,6 +8,24 @@
       "problemMatcher": []
     },
     {
+      "label": "Kiertly: open in Expo Go",
+      "type": "npm",
+      "script": "start:expo-go",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Kiertly: open in Expo Go clear cache",
+      "type": "npm",
+      "script": "start:clear-expo-go",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
       "label": "Kiertly: start Expo",
       "type": "npm",
       "script": "start",
