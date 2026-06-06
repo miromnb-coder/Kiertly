@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '../../constants/theme';
+import { KiertlyCategoryPicker, type ShareCategory } from './KiertlyCategoryPicker';
 import { KiertlyFormField } from './KiertlyFormField';
 import { KiertlyFormRow } from './KiertlyFormRow';
 import { KiertlyPhotoUploadBox } from './KiertlyPhotoUploadBox';
@@ -15,6 +16,18 @@ type KiertlyShareScreenProps = {
 
 export function KiertlyShareScreen({ onClose }: KiertlyShareScreenProps) {
   const [selectedMethod, setSelectedMethod] = useState<ShareMethod>('Lainaa ilmaiseksi');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<ShareCategory | undefined>();
+  const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
+
+  const shouldShowPrice = selectedMethod === 'Vuokraa' || selectedMethod === 'Myy käytettynä';
+
+  function selectCategory(category: ShareCategory) {
+    setSelectedCategory(category);
+    setIsCategoryPickerOpen(false);
+  }
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
@@ -31,17 +44,38 @@ export function KiertlyShareScreen({ onClose }: KiertlyShareScreenProps) {
           <KiertlyPhotoUploadBox />
 
           <View style={styles.form}>
-            <KiertlyFormField label="Otsikko" helperText="Mitä jaat?" />
+            <KiertlyFormField
+              label="Otsikko"
+              value={title}
+              hintText="Mitä jaat?"
+              onChangeText={setTitle}
+            />
             <KiertlyFormField
               label="Kuvaus"
-              helperText="Kerro tavarasta, kunnosta ja muista oleellisista tiedoista."
+              value={description}
+              hintText="Kerro tavarasta, kunnosta ja muista oleellisista tiedoista."
+              onChangeText={setDescription}
+              multiline
             />
-            <KiertlyFormRow label="Kategoria" value="Valitse kategoria" showChevron />
+            <KiertlyFormRow
+              label="Kategoria"
+              value={selectedCategory ?? 'Valitse kategoria'}
+              showChevron
+              onPress={() => setIsCategoryPickerOpen(true)}
+            />
             <KiertlyShareMethodChips
               selectedMethod={selectedMethod}
               onMethodPress={setSelectedMethod}
             />
-            <KiertlyFormRow label="Hinta" value="0,00 €" rightText="Valinnainen" />
+            {shouldShowPrice ? (
+              <KiertlyFormField
+                label="Hinta"
+                value={price}
+                hintText="0,00 €"
+                onChangeText={setPrice}
+                keyboardType="decimal-pad"
+              />
+            ) : null}
             <KiertlyFormRow label="Sijainti" value="Valitse sijainti" showChevron />
           </View>
         </ScrollView>
@@ -51,6 +85,14 @@ export function KiertlyShareScreen({ onClose }: KiertlyShareScreenProps) {
             <Text style={styles.submitText}>Jaa tavara</Text>
           </Pressable>
         </View>
+
+        {isCategoryPickerOpen ? (
+          <KiertlyCategoryPicker
+            selectedCategory={selectedCategory}
+            onSelectCategory={selectCategory}
+            onClose={() => setIsCategoryPickerOpen(false)}
+          />
+        ) : null}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
