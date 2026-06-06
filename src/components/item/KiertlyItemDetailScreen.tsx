@@ -73,7 +73,7 @@ export function KiertlyItemDetailScreen({ item, onBack }: KiertlyItemDetailScree
           </View>
 
           <View style={styles.highlightRow}>
-            <Feather name="leaf" size={20} color={theme.colors.primary} />
+            <Feather name="repeat" size={20} color={theme.colors.primary} />
             <Text style={styles.highlight}>{item.highlight}</Text>
           </View>
 
