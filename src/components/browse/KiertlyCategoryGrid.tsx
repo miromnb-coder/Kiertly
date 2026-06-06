@@ -1,5 +1,4 @@
-import { Feather } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 
 import { theme } from '../../constants/theme';
 import type { HomeCategory } from '../home/KiertlyCategoryChips';
@@ -7,19 +6,59 @@ import type { HomeCategory } from '../home/KiertlyCategoryChips';
 type BrowseCategory = {
   title: string;
   targetCategory: HomeCategory;
-  icon: keyof typeof Feather.glyphMap;
+  image: ImageSourcePropType;
   backgroundColor: string;
 };
 
 const categories: BrowseCategory[] = [
-  { title: 'Työkalut', targetCategory: 'Lainaa', icon: 'tool', backgroundColor: '#F1E8D7' },
-  { title: 'Retkeily', targetCategory: 'Lähellä', icon: 'map', backgroundColor: '#EEF3E4' },
-  { title: 'Matkailu', targetCategory: 'Vuokraa', icon: 'briefcase', backgroundColor: '#EFE5D6' },
-  { title: 'Koti', targetCategory: 'Ilmaiset', icon: 'home', backgroundColor: '#ECE8DC' },
-  { title: 'Elektroniikka', targetCategory: 'Vuokraa', icon: 'smartphone', backgroundColor: '#E8E4D8' },
-  { title: 'Juhlat', targetCategory: 'Vaihda', icon: 'flag', backgroundColor: '#F3E9D8' },
-  { title: 'Viihde', targetCategory: 'Vaihda', icon: 'book-open', backgroundColor: '#EEE7D8' },
-  { title: 'Urheilu', targetCategory: 'Lähellä', icon: 'activity', backgroundColor: '#F0E7DA' },
+  {
+    title: 'Työkalut',
+    targetCategory: 'Lainaa',
+    image: require('../../../assets/categories/tools.PNG'),
+    backgroundColor: '#F1E8D7',
+  },
+  {
+    title: 'Retkeily',
+    targetCategory: 'Lähellä',
+    image: require('../../../assets/categories/camping.PNG'),
+    backgroundColor: '#EEF3E4',
+  },
+  {
+    title: 'Matkailu',
+    targetCategory: 'Vuokraa',
+    image: require('../../../assets/categories/travel.PNG'),
+    backgroundColor: '#EFE5D6',
+  },
+  {
+    title: 'Koti',
+    targetCategory: 'Ilmaiset',
+    image: require('../../../assets/categories/home.PNG'),
+    backgroundColor: '#ECE8DC',
+  },
+  {
+    title: 'Elektroniikka',
+    targetCategory: 'Vuokraa',
+    image: require('../../../assets/categories/electronics.PNG'),
+    backgroundColor: '#E8E4D8',
+  },
+  {
+    title: 'Juhlat',
+    targetCategory: 'Vaihda',
+    image: require('../../../assets/categories/party.PNG'),
+    backgroundColor: '#F3E9D8',
+  },
+  {
+    title: 'Viihde',
+    targetCategory: 'Vaihda',
+    image: require('../../../assets/categories/entertainment.PNG'),
+    backgroundColor: '#EEE7D8',
+  },
+  {
+    title: 'Urheilu',
+    targetCategory: 'Lähellä',
+    image: require('../../../assets/categories/sports.PNG'),
+    backgroundColor: '#F0E7DA',
+  },
 ];
 
 type KiertlyCategoryGridProps = {
@@ -37,9 +76,7 @@ export function KiertlyCategoryGrid({ onCategoryPress }: KiertlyCategoryGridProp
           style={[styles.card, { backgroundColor: category.backgroundColor }]}
         >
           <Text style={styles.title}>{category.title}</Text>
-          <View style={styles.iconWrap}>
-            <Feather name={category.icon} size={38} color={theme.colors.primary} strokeWidth={1.8} />
-          </View>
+          <Image source={category.image} style={styles.image} resizeMode="contain" />
         </Pressable>
       ))}
     </View>
@@ -63,19 +100,18 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: 'rgba(229, 225, 216, 0.7)',
+    overflow: 'hidden',
   },
   title: {
+    zIndex: 1,
     color: theme.colors.text,
     fontSize: 17,
     fontWeight: '800',
   },
-  iconWrap: {
-    alignSelf: 'flex-end',
-    width: 76,
-    height: 76,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: theme.radius.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.46)',
+  image: {
+    alignSelf: 'center',
+    width: '92%',
+    height: 92,
+    marginTop: 2,
   },
 });
