@@ -6,7 +6,7 @@ import { theme } from '../src/constants/theme';
 
 export default function HomeScreen() {
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.screen} edges={['top']}>
       <View style={styles.content}>
         <View style={styles.card}>
           <Text style={styles.logo}>Kiertly</Text>
@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: theme.spacing.lg,
+    paddingBottom: 104,
   },
   card: {
     width: '100%',
