@@ -1,0 +1,26 @@
+{
+  "name": "Kiertly Expo React Native",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "forwardPorts": [8081, 19000, 19001, 19002, 19006],
+  "portsAttributes": {
+    "8081": {
+      "label": "Expo Metro",
+      "onAutoForward": "notify"
+    },
+    "19006": {
+      "label": "Expo Web",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "expo.vscode-expo-tools",
+        "ms-vscode.vscode-typescript-next"
+      ]
+    }
+  }
+}
