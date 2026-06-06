@@ -1,10 +1,20 @@
-import { Image, Pressable, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
+import {
+  ImageBackground,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+  type ImageSourcePropType,
+} from 'react-native';
 
 import { theme } from '../../constants/theme';
 import type { HomeCategory } from '../home/KiertlyCategoryChips';
 
 const categoryImageBaseUrl =
   'https://raw.githubusercontent.com/miromnb-coder/Kiertly/main/assets/categories';
+
+const gridGap = 10;
 
 type BrowseCategory = {
   title: string;
@@ -69,6 +79,9 @@ type KiertlyCategoryGridProps = {
 };
 
 export function KiertlyCategoryGrid({ onCategoryPress }: KiertlyCategoryGridProps) {
+  const { width } = useWindowDimensions();
+  const cardSize = (width - theme.spacing.md * 2 - gridGap) / 2;
+
   return (
     <View style={styles.grid}>
       {categories.map((category) => (
@@ -76,10 +89,16 @@ export function KiertlyCategoryGrid({ onCategoryPress }: KiertlyCategoryGridProp
           key={category.title}
           accessibilityRole="button"
           onPress={() => onCategoryPress(category.targetCategory)}
-          style={[styles.card, { backgroundColor: category.backgroundColor }]}
+          style={[styles.card, { width: cardSize, height: cardSize }]}
         >
-          <Image source={category.image} style={styles.image} resizeMode="cover" />
-          <Text style={styles.title}>{category.title}</Text>
+          <ImageBackground
+            source={category.image}
+            resizeMode="cover"
+            style={styles.cardImage}
+            imageStyle={styles.cardImageRadius}
+          >
+            <Text style={styles.title}>{category.title}</Text>
+          </ImageBackground>
         </Pressable>
       ))}
     </View>
@@ -90,33 +109,27 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    columnGap: 10,
-    rowGap: 10,
+    gap: gridGap,
     paddingHorizontal: theme.spacing.md,
     paddingBottom: 112,
   },
   card: {
-    width: '48.5%',
-    aspectRatio: 1,
-    padding: theme.spacing.md,
     borderRadius: theme.radius.md,
+    overflow: 'hidden',
+    backgroundColor: '#F1E8D7',
     borderWidth: 1,
     borderColor: 'rgba(229, 225, 216, 0.7)',
-    overflow: 'hidden',
+  },
+  cardImage: {
+    flex: 1,
+    padding: theme.spacing.md,
+  },
+  cardImageRadius: {
+    borderRadius: theme.radius.md,
   },
   title: {
-    zIndex: 1,
     color: theme.colors.text,
     fontSize: 17,
     fontWeight: '800',
-  },
-  image: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
   },
 });
