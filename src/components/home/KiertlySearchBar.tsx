@@ -1,15 +1,21 @@
 import { Feather } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
 
 export function KiertlySearchBar() {
   return (
     <View style={styles.row}>
-      <View style={styles.searchBox}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Avaa haku"
+        onPress={() => router.push('/search')}
+        style={styles.searchBox}
+      >
         <Feather name="search" size={18} color={theme.colors.mutedText} />
         <Text style={styles.placeholder}>Hae tavaroita tai jäseniä</Text>
-      </View>
+      </Pressable>
 
       <View style={styles.iconButton}>
         <Feather name="bell" size={20} color={theme.colors.primary} />
