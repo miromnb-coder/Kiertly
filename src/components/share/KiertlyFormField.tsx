@@ -1,17 +1,37 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View, type KeyboardTypeOptions } from 'react-native';
 
 import { theme } from '../../constants/theme';
 
 type KiertlyFormFieldProps = {
   label: string;
-  helperText: string;
+  value: string;
+  hintText: string;
+  onChangeText: (value: string) => void;
+  multiline?: boolean;
+  keyboardType?: KeyboardTypeOptions;
 };
 
-export function KiertlyFormField({ label, helperText }: KiertlyFormFieldProps) {
+export function KiertlyFormField({
+  label,
+  value,
+  hintText,
+  onChangeText,
+  multiline = false,
+  keyboardType = 'default',
+}: KiertlyFormFieldProps) {
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
-      <Text style={styles.helperText}>{helperText}</Text>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={hintText}
+        placeholderTextColor={theme.colors.mutedText}
+        multiline={multiline}
+        keyboardType={keyboardType}
+        returnKeyType={multiline ? 'default' : 'next'}
+        style={[styles.input, multiline && styles.multilineInput]}
+      />
     </View>
   );
 }
@@ -28,9 +48,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '800',
   },
-  helperText: {
-    color: theme.colors.mutedText,
+  input: {
+    minHeight: 24,
+    padding: 0,
+    color: theme.colors.text,
     fontSize: 16,
     lineHeight: 22,
+  },
+  multilineInput: {
+    minHeight: 64,
+    textAlignVertical: 'top',
   },
 });
