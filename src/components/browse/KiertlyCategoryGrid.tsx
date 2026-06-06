@@ -98,7 +98,6 @@ const styles = StyleSheet.create({
   card: {
     width: '48.5%',
     minHeight: 144,
-    justifyContent: 'space-between',
     padding: theme.spacing.md,
     borderRadius: theme.radius.md,
     borderWidth: 1,
@@ -112,9 +111,10 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   image: {
-    alignSelf: 'center',
-    width: '92%',
-    height: 92,
-    marginTop: 2,
+    position: 'absolute',
+    right: -12,
+    bottom: -14,
+    width: '95%',
+    height: '82%',
   },
 });
