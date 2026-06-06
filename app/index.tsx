@@ -1,29 +1,38 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { KiertlyBottomTabBar } from '../src/components/KiertlyBottomTabBar';
 import { theme } from '../src/constants/theme';
 
 export default function HomeScreen() {
   return (
-    <View style={styles.screen}>
-      <View style={styles.card}>
-        <Text style={styles.logo}>Kiertly</Text>
-        <Text style={styles.title}>Expo + React Native + TypeScript pohja</Text>
-        <Text style={styles.description}>
-          Tämä on puhdas mobiilisovelluspohja Kiertlylle. Se käyttää Expoa,
-          React Nativea, TypeScriptiä ja expo-routeria.
-        </Text>
+    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+      <View style={styles.content}>
+        <View style={styles.card}>
+          <Text style={styles.logo}>Kiertly</Text>
+          <Text style={styles.title}>Expo + React Native + TypeScript pohja</Text>
+          <Text style={styles.description}>
+            Tämä on puhdas mobiilisovelluspohja Kiertlylle. Alavalikko on nyt
+            omana uudelleenkäytettävänä komponenttina.
+          </Text>
+        </View>
       </View>
-    </View>
+
+      <KiertlyBottomTabBar activeTab="home" />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  content: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: theme.spacing.lg,
-    backgroundColor: theme.colors.background,
   },
   card: {
     width: '100%',
