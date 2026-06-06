@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import type { KiertlyGridItem } from '../home/KiertlyItemGrid';
 import { theme } from '../../constants/theme';
 import { KiertlyCategoryPicker, type ShareCategory } from './KiertlyCategoryPicker';
 import { KiertlyFormField } from './KiertlyFormField';
@@ -13,11 +14,52 @@ import { KiertlyShareMethodChips, type ShareMethod } from './KiertlyShareMethodC
 
 type KiertlyShareScreenProps = {
   onClose: () => void;
+  onCreateItem: (item: KiertlyGridItem) => void;
 };
 
 const maxPhotos = 10;
 
-export function KiertlyShareScreen({ onClose }: KiertlyShareScreenProps) {
+function getHighlight(method: ShareMethod, price: string) {
+  if (method === 'Vuokraa') {
+    return price.trim() ? `${price.trim()} € / päivä` : 'Vuokraa';
+  }
+
+  if (method === 'Myy käytettynä') {
+    return price.trim() ? `${price.trim()} €` : 'Myy käytettynä';
+  }
+
+  if (method === 'Lainaa ilmaiseksi') {
+    return 'Lainaa ilmaiseksi';
+  }
+
+  if (method === 'Anna ilmaiseksi') {
+    return 'Ilmainen';
+  }
+
+  return 'Vaihda';
+}
+
+function getFilterCategories(method: ShareMethod) {
+  if (method === 'Lainaa ilmaiseksi') {
+    return ['Lainaa' as const];
+  }
+
+  if (method === 'Vuokraa') {
+    return ['Vuokraa' as const];
+  }
+
+  if (method === 'Vaihda') {
+    return ['Vaihda' as const];
+  }
+
+  if (method === 'Anna ilmaiseksi') {
+    return ['Ilmaiset' as const];
+  }
+
+  return ['Kaikki' as const];
+}
+
+export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreenProps) {
   const [selectedMethod, setSelectedMethod] = useState<ShareMethod>('Lainaa ilmaiseksi');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -69,6 +111,50 @@ export function KiertlyShareScreen({ onClose }: KiertlyShareScreenProps) {
 
   function removePhoto(photoId: string) {
     setSelectedPhotos((currentPhotos) => currentPhotos.filter((photo) => photo.id !== photoId));
+  }
+
+  function submitItem() {
+    const trimmedTitle = title.trim();
+    const trimmedPrice = price.trim();
+
+    if (selectedPhotos.length === 0) {
+      Alert.alert('Lisää kuva', 'Lisää tavarasta ainakin yksi kuva.');
+      return;
+    }
+
+    if (!trimmedTitle) {
+      Alert.alert('Lisää otsikko', 'Kirjoita tavaralle otsikko.');
+      return;
+    }
+
+    if (!selectedCategory) {
+      Alert.alert('Valitse kategoria', 'Valitse tavaralle kategoria.');
+      return;
+    }
+
+    if (shouldShowPrice && !trimmedPrice) {
+      Alert.alert('Lisää hinta', 'Kirjoita hinta tälle jakotavalle.');
+      return;
+    }
+
+    const newItem: KiertlyGridItem = {
+      id: `shared-${Date.now()}`,
+      title: trimmedTitle,
+      meta: `${selectedMethod} • ${selectedCategory}`,
+      highlight: getHighlight(selectedMethod, trimmedPrice),
+      likes: 0,
+      backgroundColor: '#EFE5D6',
+      imageUri: selectedPhotos[0].uri,
+      filterCategories: getFilterCategories(selectedMethod),
+    };
+
+    onCreateItem(newItem);
+    Alert.alert('Tavara lisätty!', 'Tavara lisättiin Kiertlyyn.', [
+      {
+        text: 'OK',
+        onPress: onClose,
+      },
+    ]);
   }
 
   return (
@@ -127,7 +213,7 @@ export function KiertlyShareScreen({ onClose }: KiertlyShareScreenProps) {
         </ScrollView>
 
         <View style={styles.footer}>
-          <Pressable accessibilityRole="button" style={styles.submitButton}>
+          <Pressable accessibilityRole="button" onPress={submitItem} style={styles.submitButton}>
             <Text style={styles.submitText}>Jaa tavara</Text>
           </Pressable>
         </View>
