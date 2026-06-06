@@ -1,16 +1,19 @@
 import { Feather } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
 
-export function KiertlySearchBar() {
+type KiertlySearchBarProps = {
+  onPress?: () => void;
+};
+
+export function KiertlySearchBar({ onPress }: KiertlySearchBarProps) {
   return (
     <View style={styles.row}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Avaa haku"
-        onPress={() => router.push('/search')}
+        onPress={onPress}
         style={styles.searchBox}
       >
         <Feather name="search" size={18} color={theme.colors.mutedText} />
