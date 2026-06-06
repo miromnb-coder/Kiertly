@@ -1,19 +1,21 @@
 import { Feather } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
 import type { HomeCategory } from './KiertlyCategoryChips';
 
-type KiertlyItem = {
+export type KiertlyGridItem = {
   id: string;
   title: string;
   meta: string;
   highlight: string;
   likes: number;
   backgroundColor: string;
+  imageUri?: string;
+  filterCategories?: HomeCategory[];
 };
 
-const allItems: KiertlyItem[] = [
+const allItems: KiertlyGridItem[] = [
   {
     id: 'drill',
     title: 'Akkuporakone Bosch',
@@ -48,7 +50,7 @@ const allItems: KiertlyItem[] = [
   },
 ];
 
-const itemsByCategory: Record<HomeCategory, KiertlyItem[]> = {
+const itemsByCategory: Record<HomeCategory, KiertlyGridItem[]> = {
   Kaikki: allItems,
   Lainaa: [],
   Vuokraa: [],
@@ -59,10 +61,17 @@ const itemsByCategory: Record<HomeCategory, KiertlyItem[]> = {
 
 type KiertlyItemGridProps = {
   activeCategory: HomeCategory;
+  sharedItems: KiertlyGridItem[];
 };
 
-export function KiertlyItemGrid({ activeCategory }: KiertlyItemGridProps) {
-  const items = itemsByCategory[activeCategory];
+export function KiertlyItemGrid({ activeCategory, sharedItems }: KiertlyItemGridProps) {
+  const baseItems = itemsByCategory[activeCategory];
+  const matchingSharedItems = sharedItems.filter(
+    (item) => activeCategory === 'Kaikki' || item.filterCategories?.includes(activeCategory),
+  );
+  const items = activeCategory === 'Kaikki'
+    ? [...matchingSharedItems, ...baseItems]
+    : matchingSharedItems;
 
   if (items.length === 0) {
     return (
@@ -82,7 +91,10 @@ export function KiertlyItemGrid({ activeCategory }: KiertlyItemGridProps) {
     <View style={styles.grid}>
       {items.map((item) => (
         <View key={item.id} style={styles.card}>
-          <View style={[styles.image, { backgroundColor: item.backgroundColor }]}>
+          <View style={[styles.image, { backgroundColor: item.backgroundColor }]}> 
+            {item.imageUri ? (
+              <Image source={{ uri: item.imageUri }} style={styles.itemPhoto} resizeMode="cover" />
+            ) : null}
             <View style={styles.likesPill}>
               <Feather name="heart" size={14} color={theme.colors.text} />
               <Text style={styles.likesText}>{item.likes}</Text>
@@ -126,6 +138,10 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: theme.radius.sm,
     overflow: 'hidden',
+  },
+  itemPhoto: {
+    width: '100%',
+    height: '100%',
   },
   likesPill: {
     position: 'absolute',
