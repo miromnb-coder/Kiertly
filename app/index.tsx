@@ -3,7 +3,10 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 're
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { KiertlyBottomTabBar } from '../src/components/KiertlyBottomTabBar';
-import { KiertlyCategoryChips } from '../src/components/home/KiertlyCategoryChips';
+import {
+  KiertlyCategoryChips,
+  type HomeCategory,
+} from '../src/components/home/KiertlyCategoryChips';
 import { KiertlyItemGrid } from '../src/components/home/KiertlyItemGrid';
 import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
 import { KiertlySearchEmptyState } from '../src/components/search/KiertlySearchEmptyState';
@@ -15,6 +18,7 @@ export default function HomeScreen() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeSearchTab, setActiveSearchTab] = useState<KiertlySearchMode>('products');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<HomeCategory>('Kaikki');
 
   function closeSearch() {
     setIsSearchOpen(false);
@@ -43,8 +47,11 @@ export default function HomeScreen() {
         <>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.homeContent}>
             <KiertlySearchBar onPress={() => setIsSearchOpen(true)} />
-            <KiertlyCategoryChips />
-            <KiertlyItemGrid />
+            <KiertlyCategoryChips
+              activeCategory={activeCategory}
+              onCategoryPress={setActiveCategory}
+            />
+            <KiertlyItemGrid activeCategory={activeCategory} />
           </ScrollView>
 
           <KiertlyBottomTabBar activeTab="home" />
