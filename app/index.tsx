@@ -9,7 +9,7 @@ import {
   KiertlyCategoryChips,
   type HomeCategory,
 } from '../src/components/home/KiertlyCategoryChips';
-import { KiertlyItemGrid } from '../src/components/home/KiertlyItemGrid';
+import { KiertlyItemGrid, type KiertlyGridItem } from '../src/components/home/KiertlyItemGrid';
 import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
 import { KiertlySearchEmptyState } from '../src/components/search/KiertlySearchEmptyState';
 import { KiertlySearchHeader, type KiertlySearchMode } from '../src/components/search/KiertlySearchHeader';
@@ -23,6 +23,7 @@ export default function HomeScreen() {
   const [activeSearchTab, setActiveSearchTab] = useState<KiertlySearchMode>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<HomeCategory>('Kaikki');
+  const [sharedItems, setSharedItems] = useState<KiertlyGridItem[]>([]);
 
   function closeSearch() {
     setIsSearchOpen(false);
@@ -32,6 +33,12 @@ export default function HomeScreen() {
 
   function openHomeCategory(category: HomeCategory) {
     setActiveCategory(category);
+    setActiveTab('home');
+  }
+
+  function createSharedItem(item: KiertlyGridItem) {
+    setSharedItems((currentItems) => [item, ...currentItems]);
+    setActiveCategory('Kaikki');
     setActiveTab('home');
   }
 
@@ -52,13 +59,18 @@ export default function HomeScreen() {
           activeCategory={activeCategory}
           onCategoryPress={setActiveCategory}
         />
-        <KiertlyItemGrid activeCategory={activeCategory} />
+        <KiertlyItemGrid activeCategory={activeCategory} sharedItems={sharedItems} />
       </ScrollView>
     );
   }
 
   if (activeTab === 'share' && !isSearchOpen) {
-    return <KiertlyShareScreen onClose={() => setActiveTab('home')} />;
+    return (
+      <KiertlyShareScreen
+        onClose={() => setActiveTab('home')}
+        onCreateItem={createSharedItem}
+      />
+    );
   }
 
   return (
