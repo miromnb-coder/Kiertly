@@ -78,8 +78,8 @@ export function KiertlyCategoryGrid({ onCategoryPress }: KiertlyCategoryGridProp
           onPress={() => onCategoryPress(category.targetCategory)}
           style={[styles.card, { backgroundColor: category.backgroundColor }]}
         >
+          <Image source={category.image} style={styles.image} resizeMode="cover" />
           <Text style={styles.title}>{category.title}</Text>
-          <Image source={category.image} style={styles.image} resizeMode="contain" />
         </Pressable>
       ))}
     </View>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '48.5%',
-    minHeight: 144,
+    aspectRatio: 1,
     padding: theme.spacing.md,
     borderRadius: theme.radius.md,
     borderWidth: 1,
@@ -112,9 +112,11 @@ const styles = StyleSheet.create({
   },
   image: {
     position: 'absolute',
-    right: -12,
-    bottom: -14,
-    width: '95%',
-    height: '82%',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
   },
 });
