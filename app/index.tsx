@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { KiertlyBottomTabBar } from '../src/components/KiertlyBottomTabBar';
+import { KiertlyBottomTabBar, type BottomTabKey } from '../src/components/KiertlyBottomTabBar';
+import { KiertlyBrowseHeader } from '../src/components/browse/KiertlyBrowseHeader';
+import { KiertlyCategoryGrid } from '../src/components/browse/KiertlyCategoryGrid';
 import {
   KiertlyCategoryChips,
   type HomeCategory,
@@ -15,6 +17,7 @@ import { KiertlySearchTabs } from '../src/components/search/KiertlySearchTabs';
 import { theme } from '../src/constants/theme';
 
 export default function HomeScreen() {
+  const [activeTab, setActiveTab] = useState<BottomTabKey>('home');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeSearchTab, setActiveSearchTab] = useState<KiertlySearchMode>('products');
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,6 +27,33 @@ export default function HomeScreen() {
     setIsSearchOpen(false);
     setSearchQuery('');
     setActiveSearchTab('products');
+  }
+
+  function openHomeCategory(category: HomeCategory) {
+    setActiveCategory(category);
+    setActiveTab('home');
+  }
+
+  function renderMainContent() {
+    if (activeTab === 'browse') {
+      return (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.pageContent}>
+          <KiertlyBrowseHeader onSearchPress={() => setIsSearchOpen(true)} />
+          <KiertlyCategoryGrid onCategoryPress={openHomeCategory} />
+        </ScrollView>
+      );
+    }
+
+    return (
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.pageContent}>
+        <KiertlySearchBar onPress={() => setIsSearchOpen(true)} />
+        <KiertlyCategoryChips
+          activeCategory={activeCategory}
+          onCategoryPress={setActiveCategory}
+        />
+        <KiertlyItemGrid activeCategory={activeCategory} />
+      </ScrollView>
+    );
   }
 
   return (
@@ -45,16 +75,8 @@ export default function HomeScreen() {
         </KeyboardAvoidingView>
       ) : (
         <>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.homeContent}>
-            <KiertlySearchBar onPress={() => setIsSearchOpen(true)} />
-            <KiertlyCategoryChips
-              activeCategory={activeCategory}
-              onCategoryPress={setActiveCategory}
-            />
-            <KiertlyItemGrid activeCategory={activeCategory} />
-          </ScrollView>
-
-          <KiertlyBottomTabBar activeTab="home" />
+          {renderMainContent()}
+          <KiertlyBottomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
         </>
       )}
     </SafeAreaView>
@@ -66,7 +88,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  homeContent: {
+  pageContent: {
     paddingTop: theme.spacing.sm,
   },
   searchContent: {
