@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "Kiertly",
+    "slug": "kiertly",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "kiertly",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "plugins": ["expo-router"],
+    "web": {
+      "bundler": "metro"
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
