@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
 import type { HomeCategory } from './KiertlyCategoryChips';
@@ -13,6 +13,9 @@ export type KiertlyGridItem = {
   backgroundColor: string;
   imageUri?: string;
   filterCategories?: HomeCategory[];
+  categoryLabel?: string;
+  detailDescription?: string;
+  ownerName?: string;
 };
 
 const allItems: KiertlyGridItem[] = [
@@ -20,9 +23,12 @@ const allItems: KiertlyGridItem[] = [
     id: 'drill',
     title: 'Akkuporakone Bosch',
     meta: 'Lainaa naapurilta • 2,4 km',
-    highlight: 'Hyödynnä, älä osta uutta 🌱',
+    highlight: 'Lainaa ilmaiseksi',
     likes: 12,
     backgroundColor: '#E7DDC9',
+    categoryLabel: 'Työkalut',
+    detailDescription:
+      'Tehokas ja kevyt Boschin akkuporakone sopii kotiprojekteihin kuin pieniin remontteihin. Mukana akku ja laturi. Voin tarvittaessa neuvoa käytössä. Noudettavissa joustavasti.',
   },
   {
     id: 'suitcase',
@@ -31,14 +37,20 @@ const allItems: KiertlyGridItem[] = [
     highlight: '4 € / päivä',
     likes: 7,
     backgroundColor: '#EFE5D6',
+    categoryLabel: 'Matkailu',
+    detailDescription:
+      'Siisti ja kevyt matkalaukku viikonloppureissuille tai pidemmälle matkalle. Nouto onnistuu joustavasti lähialueelta.',
   },
   {
     id: 'chairs',
     title: 'Retkituolit 2 kpl',
     meta: 'Vaihda tai lainaa • 1,7 km',
-    highlight: 'Anna hyvän kiertää ♻️',
+    highlight: 'Vaihda',
     likes: 5,
     backgroundColor: '#DDE4D0',
+    categoryLabel: 'Retkeily',
+    detailDescription:
+      'Kaksi kokoontaitettavaa retkituolia mökille, piknikille tai retkelle. Kevyet kantaa ja helppo pakata mukaan.',
   },
   {
     id: 'speaker',
@@ -47,6 +59,9 @@ const allItems: KiertlyGridItem[] = [
     highlight: '2 € / päivä',
     likes: 9,
     backgroundColor: '#E4DED3',
+    categoryLabel: 'Elektroniikka',
+    detailDescription:
+      'Pieni mutta tehokas bluetooth-kaiutin juhliin, mökille tai piknikille. Akku kestää hyvin yhden päivän käytön.',
   },
 ];
 
@@ -62,9 +77,10 @@ const itemsByCategory: Record<HomeCategory, KiertlyGridItem[]> = {
 type KiertlyItemGridProps = {
   activeCategory: HomeCategory;
   sharedItems: KiertlyGridItem[];
+  onItemPress: (item: KiertlyGridItem) => void;
 };
 
-export function KiertlyItemGrid({ activeCategory, sharedItems }: KiertlyItemGridProps) {
+export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: KiertlyItemGridProps) {
   const baseItems = itemsByCategory[activeCategory];
   const matchingSharedItems = sharedItems.filter(
     (item) => activeCategory === 'Kaikki' || item.filterCategories?.includes(activeCategory),
@@ -90,7 +106,12 @@ export function KiertlyItemGrid({ activeCategory, sharedItems }: KiertlyItemGrid
   return (
     <View style={styles.grid}>
       {items.map((item) => (
-        <View key={item.id} style={styles.card}>
+        <Pressable
+          key={item.id}
+          accessibilityRole="button"
+          onPress={() => onItemPress(item)}
+          style={styles.card}
+        >
           <View style={[styles.image, { backgroundColor: item.backgroundColor }]}> 
             {item.imageUri ? (
               <Image source={{ uri: item.imageUri }} style={styles.itemPhoto} resizeMode="cover" />
@@ -115,7 +136,7 @@ export function KiertlyItemGrid({ activeCategory, sharedItems }: KiertlyItemGrid
             </View>
             <Feather name="more-vertical" size={18} color={theme.colors.text} />
           </View>
-        </View>
+        </Pressable>
       ))}
     </View>
   );
