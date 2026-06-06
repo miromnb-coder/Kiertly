@@ -1,22 +1,20 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { KiertlyBottomTabBar } from '../src/components/KiertlyBottomTabBar';
+import { KiertlyCategoryChips } from '../src/components/home/KiertlyCategoryChips';
+import { KiertlyItemGrid } from '../src/components/home/KiertlyItemGrid';
+import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
 import { theme } from '../src/constants/theme';
 
 export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
-      <View style={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.logo}>Kiertly</Text>
-          <Text style={styles.title}>Expo + React Native + TypeScript pohja</Text>
-          <Text style={styles.description}>
-            Tämä on puhdas mobiilisovelluspohja Kiertlylle. Alavalikko on nyt
-            omana uudelleenkäytettävänä komponenttina.
-          </Text>
-        </View>
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <KiertlySearchBar />
+        <KiertlyCategoryChips />
+        <KiertlyItemGrid />
+      </ScrollView>
 
       <KiertlyBottomTabBar activeTab="home" />
     </SafeAreaView>
@@ -29,36 +27,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.spacing.lg,
-    paddingBottom: 104,
-  },
-  card: {
-    width: '100%',
-    maxWidth: 420,
-    padding: theme.spacing.xl,
-    borderRadius: theme.radius.xl,
-    backgroundColor: theme.colors.card,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  logo: {
-    marginBottom: theme.spacing.md,
-    color: theme.colors.primary,
-    fontSize: 36,
-    fontWeight: '800',
-  },
-  title: {
-    marginBottom: theme.spacing.sm,
-    color: theme.colors.text,
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  description: {
-    color: theme.colors.mutedText,
-    fontSize: 16,
-    lineHeight: 24,
+    paddingTop: theme.spacing.sm,
   },
 });
