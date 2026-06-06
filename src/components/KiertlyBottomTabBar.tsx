@@ -43,27 +43,15 @@ export function KiertlyBottomTabBar({
               onPress={() => onTabPress?.(tab.key)}
               style={styles.tab}
             >
-              <View
-                style={[
-                  styles.iconWrap,
-                  isShare && styles.shareIconWrap,
-                  !isShare && isActive && styles.activeIconWrap,
-                ]}
-              >
+              <View style={[styles.iconWrap, isShare && styles.shareIconWrap]}>
                 <Feather
                   name={tab.icon}
-                  size={isShare ? 24 : 23}
+                  size={isShare ? 23 : 22}
                   color={isShare ? theme.colors.white : isActive ? theme.colors.primary : theme.colors.text}
-                  strokeWidth={isShare ? 2.8 : 2.2}
+                  strokeWidth={isShare ? 2.7 : 2.15}
                 />
               </View>
-              <Text
-                style={[
-                  styles.label,
-                  isActive && styles.activeLabel,
-                  isShare && styles.shareLabel,
-                ]}
-              >
+              <Text style={[styles.label, isActive && styles.activeLabel]}>
                 {tab.label}
               </Text>
             </Pressable>
@@ -76,51 +64,54 @@ export function KiertlyBottomTabBar({
 
 const styles = StyleSheet.create({
   wrapper: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    left: 0,
     width: '100%',
-    paddingHorizontal: theme.spacing.md,
-    paddingBottom: theme.spacing.sm,
+    height: 86,
+    paddingTop: 7,
+    paddingHorizontal: 8,
+    paddingBottom: 0,
     backgroundColor: theme.colors.card,
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
   },
   bar: {
-    height: 74,
+    height: 72,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
   tab: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
+    justifyContent: 'flex-start',
+    gap: 3,
+    paddingTop: 4,
   },
   iconWrap: {
-    width: 36,
-    height: 34,
+    width: 32,
+    height: 29,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.radius.pill,
   },
-  activeIconWrap: {
-    backgroundColor: '#F0F2E8',
-  },
   shareIconWrap: {
-    width: 42,
-    height: 42,
+    width: 39,
+    height: 39,
+    marginTop: -2,
     backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.pill,
   },
   label: {
     color: theme.colors.text,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
+    lineHeight: 14,
   },
   activeLabel: {
     color: theme.colors.primary,
     fontWeight: '700',
-  },
-  shareLabel: {
-    marginTop: -2,
   },
 });
