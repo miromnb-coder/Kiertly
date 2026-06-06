@@ -2,22 +2,21 @@ import { Feather } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
+import type { HomeCategory } from './KiertlyCategoryChips';
 
 type KiertlyItem = {
   id: string;
   title: string;
-  imageEmoji: string;
   meta: string;
   highlight: string;
   likes: number;
   backgroundColor: string;
 };
 
-const items: KiertlyItem[] = [
+const allItems: KiertlyItem[] = [
   {
     id: 'drill',
     title: 'Akkuporakone Bosch',
-    imageEmoji: '🔧',
     meta: 'Lainaa naapurilta • 2,4 km',
     highlight: 'Hyödynnä, älä osta uutta 🌱',
     likes: 12,
@@ -26,7 +25,6 @@ const items: KiertlyItem[] = [
   {
     id: 'suitcase',
     title: 'Matkalaukku',
-    imageEmoji: '🧳',
     meta: 'Vuokraa helposti • 3,1 km',
     highlight: '4 € / päivä',
     likes: 7,
@@ -35,7 +33,6 @@ const items: KiertlyItem[] = [
   {
     id: 'chairs',
     title: 'Retkituolit 2 kpl',
-    imageEmoji: '🏕️',
     meta: 'Vaihda tai lainaa • 1,7 km',
     highlight: 'Anna hyvän kiertää ♻️',
     likes: 5,
@@ -44,7 +41,6 @@ const items: KiertlyItem[] = [
   {
     id: 'speaker',
     title: 'Bluetooth-kaiutin',
-    imageEmoji: '🔊',
     meta: 'Vuokraa lähialueelta • 0,8 km',
     highlight: '2 € / päivä',
     likes: 9,
@@ -52,13 +48,41 @@ const items: KiertlyItem[] = [
   },
 ];
 
-export function KiertlyItemGrid() {
+const itemsByCategory: Record<HomeCategory, KiertlyItem[]> = {
+  Kaikki: allItems,
+  Lainaa: [],
+  Vuokraa: [],
+  Vaihda: [],
+  Ilmaiset: [],
+  Lähellä: [],
+};
+
+type KiertlyItemGridProps = {
+  activeCategory: HomeCategory;
+};
+
+export function KiertlyItemGrid({ activeCategory }: KiertlyItemGridProps) {
+  const items = itemsByCategory[activeCategory];
+
+  if (items.length === 0) {
+    return (
+      <View style={styles.emptyState}>
+        <View style={styles.emptyIconCircle}>
+          <Feather name="box" size={42} color={theme.colors.primary} strokeWidth={1.8} />
+        </View>
+        <Text style={styles.emptyTitle}>Ei vielä tavaroita</Text>
+        <Text style={styles.emptyDescription}>
+          Tähän kategoriaan lisätään myöhemmin tavaroita.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.grid}>
       {items.map((item) => (
         <View key={item.id} style={styles.card}>
           <View style={[styles.image, { backgroundColor: item.backgroundColor }]}>
-            <Text style={styles.imageEmoji}>{item.imageEmoji}</Text>
             <View style={styles.likesPill}>
               <Feather name="heart" size={14} color={theme.colors.text} />
               <Text style={styles.likesText}>{item.likes}</Text>
@@ -100,13 +124,8 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     aspectRatio: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     borderRadius: theme.radius.sm,
     overflow: 'hidden',
-  },
-  imageEmoji: {
-    fontSize: 62,
   },
   likesPill: {
     position: 'absolute',
@@ -153,5 +172,35 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 12,
     fontWeight: '700',
+  },
+  emptyState: {
+    flex: 1,
+    minHeight: 420,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: theme.spacing.xl,
+    paddingBottom: 112,
+  },
+  emptyIconCircle: {
+    width: 86,
+    height: 86,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing.lg,
+    borderRadius: theme.radius.pill,
+    backgroundColor: '#EEF3E4',
+  },
+  emptyTitle: {
+    marginBottom: theme.spacing.sm,
+    color: theme.colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    color: theme.colors.mutedText,
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
   },
 });
