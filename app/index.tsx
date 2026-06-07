@@ -39,6 +39,10 @@ import {
 } from '../src/lib/items';
 import { deleteItemPhotos, uploadItemPhotos } from '../src/lib/itemPhotos';
 import { fetchOwnProfile, type KiertlyProfile } from '../src/lib/profiles';
+import {
+  createBorrowRequestThread,
+  fetchMessageThreads,
+} from '../src/lib/requests';
 import { supabase } from '../src/lib/supabase';
 
 type ProfileSubscreen = 'main' | 'ownItems' | 'editItem';
@@ -55,11 +59,13 @@ export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState<HomeCategory>('Kaikki');
   const [ownItems, setOwnItems] = useState<KiertlyGridItem[]>([]);
   const [publicItems, setPublicItems] = useState<KiertlyGridItem[]>([]);
+  const [messageThreads, setMessageThreads] = useState<MessageThread[]>([]);
   const [profile, setProfile] = useState<KiertlyProfile | null>(null);
   const [selectedItem, setSelectedItem] = useState<KiertlyGridItem | undefined>();
   const [selectedThread, setSelectedThread] = useState<MessageThread | undefined>();
   const [profileSubscreen, setProfileSubscreen] = useState<ProfileSubscreen>('main');
   const [editingItem, setEditingItem] = useState<KiertlyGridItem | undefined>();
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
 
   const searchableItems = [...publicItems, ...kiertlyDefaultItems];
   const userEmail = profile?.email || session?.user.email || null;
@@ -97,21 +103,24 @@ export default function HomeScreen() {
       if (!session?.user.id) {
         setOwnItems([]);
         setPublicItems([]);
+        setMessageThreads([]);
         setProfile(null);
         return;
       }
 
       try {
-        const [nextProfile, nextOwnItems, nextPublicItems] = await Promise.all([
+        const [nextProfile, nextOwnItems, nextPublicItems, nextMessageThreads] = await Promise.all([
           fetchOwnProfile(session.user.id, session.user.email),
           fetchOwnItems(session.user.id),
           fetchPublicItems(),
+          fetchMessageThreads(session.user.id),
         ]);
 
         if (isMounted) {
           setProfile(nextProfile);
           setOwnItems(nextOwnItems);
           setPublicItems(nextPublicItems);
+          setMessageThreads(nextMessageThreads);
         }
       } catch {
         if (isMounted) {
@@ -136,6 +145,7 @@ export default function HomeScreen() {
     setSelectedItem(undefined);
     setSelectedThread(undefined);
     setEditingItem(undefined);
+    setIsSubmittingRequest(false);
     setProfileSubscreen('main');
   }
 
@@ -156,10 +166,26 @@ export default function HomeScreen() {
     });
   }
 
+  function upsertMessageThread(threadToUpsert: MessageThread) {
+    setMessageThreads((currentThreads) => {
+      const existingThread = currentThreads.find((thread) => thread.id === threadToUpsert.id);
+
+      if (existingThread) {
+        return [
+          threadToUpsert,
+          ...currentThreads.filter((thread) => thread.id !== threadToUpsert.id),
+        ];
+      }
+
+      return [threadToUpsert, ...currentThreads];
+    });
+  }
+
   async function signOut() {
     resetNavigationState();
     setOwnItems([]);
     setPublicItems([]);
+    setMessageThreads([]);
     setProfile(null);
     setAuthScreen('start');
     await supabase.auth.signOut();
@@ -265,6 +291,54 @@ export default function HomeScreen() {
     }
   }
 
+  async function requestItem(item: KiertlyGridItem) {
+    if (isSubmittingRequest) {
+      return;
+    }
+
+    if (!profile) {
+      Alert.alert('Profiilia ei löytynyt', 'Kirjaudu uudelleen ja kokeile sitten uudestaan.');
+      return;
+    }
+
+    if (!item.ownerId) {
+      Alert.alert('Pyyntöä ei voi lähettää', 'Tällä tavaralla ei ole vielä omistajatietoa.');
+      return;
+    }
+
+    if (item.ownerId === profile.id) {
+      Alert.alert('Oma tavara', 'Et voi lähettää pyyntöä omasta tavarastasi.');
+      return;
+    }
+
+    setIsSubmittingRequest(true);
+
+    try {
+      const thread = await createBorrowRequestThread(item, profile);
+      upsertMessageThread(thread);
+      setSelectedThread(thread);
+      setSelectedItem(undefined);
+      setActiveTab('messages');
+    } catch {
+      Alert.alert('Pyyntöä ei voitu lähettää', 'Yritä hetken päästä uudelleen.');
+    } finally {
+      setIsSubmittingRequest(false);
+    }
+  }
+
+  async function openItemChat(item: KiertlyGridItem) {
+    const existingThread = messageThreads.find((thread) => thread.itemId === item.id);
+
+    if (existingThread) {
+      setSelectedThread(existingThread);
+      setSelectedItem(undefined);
+      setActiveTab('messages');
+      return;
+    }
+
+    await requestItem(item);
+  }
+
   function renderMainContent() {
     if (activeTab === 'browse') {
       return (
@@ -276,7 +350,7 @@ export default function HomeScreen() {
     }
 
     if (activeTab === 'messages') {
-      return <KiertlyMessagesScreen onThreadPress={setSelectedThread} />;
+      return <KiertlyMessagesScreen threads={messageThreads} onThreadPress={setSelectedThread} />;
     }
 
     if (activeTab === 'profile') {
@@ -364,7 +438,15 @@ export default function HomeScreen() {
   }
 
   if (selectedItem && !isSearchOpen) {
-    return <KiertlyItemDetailScreen item={selectedItem} onBack={() => setSelectedItem(undefined)} />;
+    return (
+      <KiertlyItemDetailScreen
+        item={selectedItem}
+        isSubmittingRequest={isSubmittingRequest}
+        onBack={() => setSelectedItem(undefined)}
+        onRequestItem={requestItem}
+        onChatPress={openItemChat}
+      />
+    );
   }
 
   if (activeTab === 'share' && !isSearchOpen) {
