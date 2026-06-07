@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { KiertlyGridItem } from '../home/KiertlyItemGrid';
 import { theme } from '../../constants/theme';
@@ -8,9 +8,30 @@ type KiertlyOwnItemsScreenProps = {
   items: KiertlyGridItem[];
   onBack: () => void;
   onItemPress: (item: KiertlyGridItem) => void;
+  onEditItem: (item: KiertlyGridItem) => void;
+  onDeleteItem: (itemId: string) => void;
+  onToggleAvailability: (item: KiertlyGridItem) => void;
 };
 
-export function KiertlyOwnItemsScreen({ items, onBack, onItemPress }: KiertlyOwnItemsScreenProps) {
+export function KiertlyOwnItemsScreen({
+  items,
+  onBack,
+  onItemPress,
+  onEditItem,
+  onDeleteItem,
+  onToggleAvailability,
+}: KiertlyOwnItemsScreenProps) {
+  function confirmDelete(item: KiertlyGridItem) {
+    Alert.alert('Poista tavara?', `Haluatko varmasti poistaa tavaran "${item.title}"?`, [
+      { text: 'Peruuta', style: 'cancel' },
+      {
+        text: 'Poista',
+        style: 'destructive',
+        onPress: () => onDeleteItem(item.id),
+      },
+    ]);
+  }
+
   return (
     <View style={styles.screen}>
       <View style={styles.header}>
@@ -43,32 +64,54 @@ export function KiertlyOwnItemsScreen({ items, onBack, onItemPress }: KiertlyOwn
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           <Text style={styles.sectionTitle}>Lisäämäsi tavarat</Text>
           <Text style={styles.sectionDescription}>
-            Näet täällä kaikki tavarat, jotka olet lisännyt Kiertlyyn.
+            Muokkaa tietoja, poista tavara tai vaihda saatavuus nopeasti.
           </Text>
 
-          <View style={styles.grid}>
-            {items.map((item) => (
-              <Pressable
-                key={item.id}
-                accessibilityRole="button"
-                onPress={() => onItemPress(item)}
-                style={styles.card}
-              >
-                <View style={[styles.imageWrap, { backgroundColor: item.backgroundColor }]}> 
-                  {item.imageUri ? (
-                    <Image source={{ uri: item.imageUri }} style={styles.image} resizeMode="cover" />
-                  ) : (
-                    <Feather name="package" size={42} color={theme.colors.primary} strokeWidth={1.8} />
-                  )}
-                </View>
+          <View style={styles.list}>
+            {items.map((item) => {
+              const isAvailable = item.isAvailable !== false;
 
-                <View style={styles.cardTextWrap}>
-                  <Text numberOfLines={1} style={styles.itemTitle}>{item.title}</Text>
-                  <Text numberOfLines={1} style={styles.itemMeta}>{item.meta}</Text>
-                  <Text numberOfLines={1} style={styles.itemHighlight}>{item.highlight}</Text>
+              return (
+                <View key={item.id} style={styles.card}>
+                  <Pressable accessibilityRole="button" onPress={() => onItemPress(item)} style={styles.cardTop}>
+                    <View style={[styles.imageWrap, { backgroundColor: item.backgroundColor }]}> 
+                      {item.imageUri ? (
+                        <Image source={{ uri: item.imageUri }} style={styles.image} resizeMode="cover" />
+                      ) : (
+                        <Feather name="package" size={42} color={theme.colors.primary} strokeWidth={1.8} />
+                      )}
+                    </View>
+
+                    <View style={styles.cardTextWrap}>
+                      <Text numberOfLines={1} style={styles.itemTitle}>{item.title}</Text>
+                      <Text numberOfLines={1} style={styles.itemMeta}>{item.meta}</Text>
+                      <Text numberOfLines={1} style={styles.itemHighlight}>{item.highlight}</Text>
+                      <View style={[styles.statusPill, isAvailable ? styles.availablePill : styles.unavailablePill]}>
+                        <View style={[styles.statusDot, isAvailable ? styles.availableDot : styles.unavailableDot]} />
+                        <Text style={styles.statusText}>{isAvailable ? 'Saatavilla' : 'Varattu'}</Text>
+                      </View>
+                    </View>
+                  </Pressable>
+
+                  <View style={styles.actionsRow}>
+                    <Pressable accessibilityRole="button" onPress={() => onEditItem(item)} style={styles.actionButton}>
+                      <Feather name="edit-3" size={16} color={theme.colors.primary} strokeWidth={2} />
+                      <Text style={styles.actionText}>Muokkaa</Text>
+                    </Pressable>
+
+                    <Pressable accessibilityRole="button" onPress={() => onToggleAvailability(item)} style={styles.actionButton}>
+                      <Feather name={isAvailable ? 'pause-circle' : 'check-circle'} size={16} color={theme.colors.primary} strokeWidth={2} />
+                      <Text style={styles.actionText}>{isAvailable ? 'Merkitse varatuksi' : 'Saatavilla'}</Text>
+                    </Pressable>
+
+                    <Pressable accessibilityRole="button" onPress={() => confirmDelete(item)} style={[styles.actionButton, styles.deleteButton]}>
+                      <Feather name="trash-2" size={16} color="#A14C3A" strokeWidth={2} />
+                      <Text style={styles.deleteText}>Poista</Text>
+                    </Pressable>
+                  </View>
                 </View>
-              </Pressable>
-            ))}
+              );
+            })}
           </View>
         </ScrollView>
       )}
@@ -150,18 +193,23 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontWeight: '600',
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    columnGap: 10,
-    rowGap: theme.spacing.lg,
+  list: {
+    gap: theme.spacing.md,
   },
   card: {
-    width: '48.5%',
+    padding: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.42)',
+  },
+  cardTop: {
+    flexDirection: 'row',
+    gap: theme.spacing.md,
   },
   imageWrap: {
-    width: '100%',
-    aspectRatio: 1,
+    width: 96,
+    height: 96,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.radius.sm,
@@ -172,22 +220,90 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   cardTextWrap: {
-    paddingTop: 8,
+    flex: 1,
+    minWidth: 0,
+    paddingVertical: 2,
   },
   itemTitle: {
     color: theme.colors.text,
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '800',
   },
   itemMeta: {
-    marginTop: 3,
+    marginTop: 4,
     color: theme.colors.mutedText,
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 12,
+    lineHeight: 16,
   },
   itemHighlight: {
     marginTop: 5,
     color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  statusPill: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: theme.spacing.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: theme.radius.pill,
+  },
+  availablePill: {
+    backgroundColor: '#EEF3E4',
+  },
+  unavailablePill: {
+    backgroundColor: '#F3E9E4',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: theme.radius.pill,
+  },
+  availableDot: {
+    backgroundColor: theme.colors.primary,
+  },
+  unavailableDot: {
+    backgroundColor: '#A14C3A',
+  },
+  statusText: {
+    color: theme.colors.text,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing.xs,
+    marginTop: theme.spacing.sm,
+    paddingTop: theme.spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+  },
+  actionButton: {
+    minHeight: 38,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.pill,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  actionText: {
+    color: theme.colors.primary,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  deleteButton: {
+    borderColor: '#E3C7BE',
+  },
+  deleteText: {
+    color: '#A14C3A',
     fontSize: 12,
     fontWeight: '800',
   },
