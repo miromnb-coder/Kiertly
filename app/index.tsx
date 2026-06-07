@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { KiertlyAuthStartScreen } from '../src/components/auth/KiertlyAuthStartScreen';
 import { KiertlyBottomTabBar, type BottomTabKey } from '../src/components/KiertlyBottomTabBar';
 import { KiertlyBrowseHeader } from '../src/components/browse/KiertlyBrowseHeader';
 import { KiertlyCategoryGrid } from '../src/components/browse/KiertlyCategoryGrid';
@@ -30,6 +31,7 @@ import { theme } from '../src/constants/theme';
 type ProfileSubscreen = 'main' | 'ownItems' | 'editItem';
 
 export default function HomeScreen() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<BottomTabKey>('home');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeSearchTab, setActiveSearchTab] = useState<KiertlySearchMode>('products');
@@ -42,6 +44,10 @@ export default function HomeScreen() {
   const [editingItem, setEditingItem] = useState<KiertlyGridItem | undefined>();
 
   const searchableItems = [...sharedItems, ...kiertlyDefaultItems];
+
+  function completeMockAuth() {
+    setIsAuthenticated(true);
+  }
 
   function closeSearch() {
     setIsSearchOpen(false);
@@ -171,6 +177,16 @@ export default function HomeScreen() {
           onItemPress={setSelectedItem}
         />
       </ScrollView>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <KiertlyAuthStartScreen
+        onAppleContinue={completeMockAuth}
+        onGoogleContinue={completeMockAuth}
+        onEmailContinue={completeMockAuth}
+      />
     );
   }
 
