@@ -37,6 +37,7 @@ function rowToGridItem(row: ItemRow): KiertlyGridItem {
     filterCategories: (row.filter_categories ?? []) as HomeCategory[],
     categoryLabel: row.category_label ?? undefined,
     detailDescription: row.detail_description ?? undefined,
+    ownerId: row.user_id,
     ownerName: row.owner_name ?? undefined,
     isAvailable: row.is_available ?? true,
   };
