@@ -33,6 +33,7 @@ import {
   createOwnItem,
   deleteOwnItem,
   fetchOwnItems,
+  fetchPublicItems,
   updateOwnItem,
   updateOwnItemAvailability,
 } from '../src/lib/items';
@@ -51,14 +52,16 @@ export default function HomeScreen() {
   const [activeSearchTab, setActiveSearchTab] = useState<KiertlySearchMode>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<HomeCategory>('Kaikki');
-  const [sharedItems, setSharedItems] = useState<KiertlyGridItem[]>([]);
+  const [ownItems, setOwnItems] = useState<KiertlyGridItem[]>([]);
+  const [publicItems, setPublicItems] = useState<KiertlyGridItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<KiertlyGridItem | undefined>();
   const [selectedThread, setSelectedThread] = useState<MessageThread | undefined>();
   const [profileSubscreen, setProfileSubscreen] = useState<ProfileSubscreen>('main');
   const [editingItem, setEditingItem] = useState<KiertlyGridItem | undefined>();
 
-  const searchableItems = [...sharedItems, ...kiertlyDefaultItems];
+  const searchableItems = [...publicItems, ...kiertlyDefaultItems];
   const userEmail = session?.user.email ?? null;
+  const ownerDisplayName = userEmail ? userEmail.split('@')[0] : 'Kiertly-käyttäjä';
 
   useEffect(() => {
     let isMounted = true;
@@ -88,17 +91,22 @@ export default function HomeScreen() {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadOwnItems() {
+    async function loadItems() {
       if (!session?.user.id) {
-        setSharedItems([]);
+        setOwnItems([]);
+        setPublicItems([]);
         return;
       }
 
       try {
-        const items = await fetchOwnItems(session.user.id);
+        const [nextOwnItems, nextPublicItems] = await Promise.all([
+          fetchOwnItems(session.user.id),
+          fetchPublicItems(),
+        ]);
 
         if (isMounted) {
-          setSharedItems(items);
+          setOwnItems(nextOwnItems);
+          setPublicItems(nextPublicItems);
         }
       } catch {
         if (isMounted) {
@@ -107,7 +115,7 @@ export default function HomeScreen() {
       }
     }
 
-    loadOwnItems();
+    loadItems();
 
     return () => {
       isMounted = false;
@@ -126,9 +134,27 @@ export default function HomeScreen() {
     setProfileSubscreen('main');
   }
 
+  function upsertPublicItem(itemToUpsert: KiertlyGridItem) {
+    if (itemToUpsert.isAvailable === false) {
+      setPublicItems((currentItems) => currentItems.filter((item) => item.id !== itemToUpsert.id));
+      return;
+    }
+
+    setPublicItems((currentItems) => {
+      const existingItem = currentItems.find((item) => item.id === itemToUpsert.id);
+
+      if (existingItem) {
+        return currentItems.map((item) => (item.id === itemToUpsert.id ? itemToUpsert : item));
+      }
+
+      return [itemToUpsert, ...currentItems];
+    });
+  }
+
   async function signOut() {
     resetNavigationState();
-    setSharedItems([]);
+    setOwnItems([]);
+    setPublicItems([]);
     setAuthScreen('start');
     await supabase.auth.signOut();
   }
@@ -158,13 +184,15 @@ export default function HomeScreen() {
     const uploadedPhotos = await uploadItemPhotos(item.imageUris ?? [], session.user.id, item.id);
     const itemWithUploadedPhotos = {
       ...item,
+      ownerName: ownerDisplayName,
       imageUri: uploadedPhotos.imageUris[0],
       imageUris: uploadedPhotos.imageUris,
       imagePaths: uploadedPhotos.imagePaths,
     };
     const createdItem = await createOwnItem(itemWithUploadedPhotos, session.user.id);
 
-    setSharedItems((currentItems) => [createdItem, ...currentItems]);
+    setOwnItems((currentItems) => [createdItem, ...currentItems]);
+    upsertPublicItem(createdItem);
     setActiveCategory('Kaikki');
     setActiveTab('home');
     setProfileSubscreen('main');
@@ -186,9 +214,10 @@ export default function HomeScreen() {
   async function saveItem(updatedItem: KiertlyGridItem) {
     const savedItem = await updateOwnItem(updatedItem);
 
-    setSharedItems((currentItems) =>
+    setOwnItems((currentItems) =>
       currentItems.map((item) => (item.id === savedItem.id ? savedItem : item)),
     );
+    upsertPublicItem(savedItem);
     setSelectedItem((currentItem) =>
       currentItem?.id === savedItem.id ? savedItem : currentItem,
     );
@@ -198,12 +227,13 @@ export default function HomeScreen() {
 
   async function deleteItem(itemId: string) {
     try {
-      const itemToDelete = sharedItems.find((item) => item.id === itemId);
+      const itemToDelete = ownItems.find((item) => item.id === itemId);
 
       await deleteOwnItem(itemId);
       await deleteItemPhotos(itemToDelete?.imagePaths);
 
-      setSharedItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
+      setOwnItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
+      setPublicItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
       setSelectedItem((currentItem) => (currentItem?.id === itemId ? undefined : currentItem));
     } catch {
       Alert.alert('Poisto epäonnistui', 'Tavaraa ei voitu poistaa. Yritä uudelleen.');
@@ -217,9 +247,10 @@ export default function HomeScreen() {
         itemToToggle.isAvailable === false,
       );
 
-      setSharedItems((currentItems) =>
+      setOwnItems((currentItems) =>
         currentItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
       );
+      upsertPublicItem(updatedItem);
       setSelectedItem((currentItem) =>
         currentItem?.id === updatedItem.id ? updatedItem : currentItem,
       );
@@ -256,7 +287,7 @@ export default function HomeScreen() {
       if (profileSubscreen === 'ownItems') {
         return (
           <KiertlyOwnItemsScreen
-            items={sharedItems}
+            items={ownItems}
             onBack={() => setProfileSubscreen('main')}
             onItemPress={setSelectedItem}
             onEditItem={editItem}
@@ -269,7 +300,7 @@ export default function HomeScreen() {
       return (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.pageContent}>
           <KiertlyProfileScreen
-            sharedItemCount={sharedItems.length}
+            sharedItemCount={ownItems.length}
             userEmail={userEmail}
             onOwnItemsPress={() => setProfileSubscreen('ownItems')}
             onSignOut={signOut}
@@ -287,7 +318,7 @@ export default function HomeScreen() {
         />
         <KiertlyItemGrid
           activeCategory={activeCategory}
-          sharedItems={sharedItems}
+          sharedItems={publicItems}
           onItemPress={setSelectedItem}
         />
       </ScrollView>
