@@ -43,7 +43,67 @@ function getDescription(item: KiertlyGridItem) {
     return item.detailDescription.trim();
   }
 
-  return 'Hyväkuntoinen tavara lähialueelta. Sopii arjen tarpeisiin ja on noudettavissa joustavasti. Kysy rohkeasti lisätietoja ennen varausta.';
+  return 'Tavaralle ei ole vielä lisätty tarkempaa kuvausta. Voit kysyä lisätietoja omistajalta viestillä ennen lainausta.';
+}
+
+function getLocationLabel(item: KiertlyGridItem) {
+  return item.locationLabel || 'Sijainti lisäämättä';
+}
+
+function getAvailabilityText(item: KiertlyGridItem) {
+  return item.isAvailable === false ? 'Varattu juuri nyt' : 'Saatavilla';
+}
+
+function getConditionLabel(item: KiertlyGridItem) {
+  return item.isAvailable === false ? 'Varattu' : 'Saatavilla';
+}
+
+function getMetaText(item: KiertlyGridItem) {
+  const methodText = item.meta.split('•')[0]?.trim();
+  const locationLabel = getLocationLabel(item);
+
+  if (methodText) {
+    return `${methodText} • ${locationLabel}`;
+  }
+
+  return locationLabel;
+}
+
+function formatCreatedAt(value?: string) {
+  if (!value) {
+    return 'Lisätty äskettäin';
+  }
+
+  const createdAt = new Date(value);
+
+  if (Number.isNaN(createdAt.getTime())) {
+    return 'Lisätty äskettäin';
+  }
+
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const startOfCreatedAt = new Date(
+    createdAt.getFullYear(),
+    createdAt.getMonth(),
+    createdAt.getDate(),
+  );
+  const dayDifference = Math.round(
+    (startOfToday.getTime() - startOfCreatedAt.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  if (dayDifference <= 0) {
+    return 'Lisätty tänään';
+  }
+
+  if (dayDifference === 1) {
+    return 'Lisätty eilen';
+  }
+
+  if (dayDifference < 7) {
+    return `Lisätty ${dayDifference} päivää sitten`;
+  }
+
+  return `Lisätty ${String(createdAt.getDate()).padStart(2, '0')}.${String(createdAt.getMonth() + 1).padStart(2, '0')}.`;
 }
 
 export function KiertlyItemDetailScreen({
@@ -53,31 +113,38 @@ export function KiertlyItemDetailScreen({
   onRequestItem,
   onChatPress,
 }: KiertlyItemDetailScreenProps) {
-  const category = item.categoryLabel ?? 'Työkalut';
+  const category = item.categoryLabel ?? 'Kategoria lisäämättä';
+  const locationLabel = getLocationLabel(item);
+  const availabilityText = getAvailabilityText(item);
+  const imageCount = item.imageUris?.length || (item.imageUri ? 1 : 0);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
       <KiertlyItemDetailHeader onBack={onBack} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <KiertlyItemHeroImage imageUri={item.imageUri} backgroundColor={item.backgroundColor} />
+        <KiertlyItemHeroImage
+          imageUri={item.imageUri}
+          backgroundColor={item.backgroundColor}
+          imageCount={imageCount}
+        />
 
         <View style={styles.body}>
           <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.meta}>{item.meta}</Text>
+          <Text style={styles.meta}>{getMetaText(item)}</Text>
 
           <View style={styles.badgeRow}>
             <View style={styles.badge}>
-              <View style={styles.greenDot} />
-              <Text style={styles.badgeText}>Hyväkuntoinen</Text>
+              <View style={[styles.statusDot, item.isAvailable === false && styles.unavailableDot]} />
+              <Text style={styles.badgeText}>{getConditionLabel(item)}</Text>
             </View>
             <View style={styles.badge}>
               <Feather name="map-pin" size={13} color={theme.colors.mutedText} />
-              <Text style={styles.badgeText}>Helsinki, Kallio</Text>
+              <Text style={styles.badgeText}>{locationLabel}</Text>
             </View>
             <View style={styles.badge}>
               <Feather name="clock" size={13} color={theme.colors.mutedText} />
-              <Text style={styles.badgeText}>Lisätty äsken</Text>
+              <Text style={styles.badgeText}>{formatCreatedAt(item.createdAt)}</Text>
             </View>
           </View>
 
@@ -88,8 +155,12 @@ export function KiertlyItemDetailScreen({
 
           <Text style={styles.description}>{getDescription(item)}</Text>
 
-          <KiertlyOwnerCard ownerName={item.ownerName} />
-          <KiertlyItemInfoRows category={category} />
+          <KiertlyOwnerCard ownerName={item.ownerName} locationLabel={locationLabel} />
+          <KiertlyItemInfoRows
+            category={category}
+            availabilityText={availabilityText}
+            locationLabel={locationLabel}
+          />
         </View>
       </ScrollView>
 
@@ -143,11 +214,14 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.pill,
     backgroundColor: 'rgba(255, 255, 255, 0.45)',
   },
-  greenDot: {
+  statusDot: {
     width: 8,
     height: 8,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.primary,
+  },
+  unavailableDot: {
+    backgroundColor: '#A14C3A',
   },
   badgeText: {
     color: theme.colors.mutedText,
