@@ -12,19 +12,50 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '../../constants/theme';
+import { supabase } from '../../lib/supabase';
 
 type AuthMode = 'signUp' | 'signIn';
 
 type KiertlyEmailAuthScreenProps = {
   onBack: () => void;
-  onContinue: () => void;
+  onAuthenticated: () => void;
 };
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
-export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthScreenProps) {
+function getAuthErrorMessage(message?: string) {
+  if (!message) {
+    return 'Jokin meni pieleen. Yritä uudelleen.';
+  }
+
+  const normalizedMessage = message.toLowerCase();
+
+  if (normalizedMessage.includes('invalid login credentials')) {
+    return 'Sähköposti tai salasana on väärin.';
+  }
+
+  if (normalizedMessage.includes('email not confirmed')) {
+    return 'Vahvista sähköposti ennen kirjautumista.';
+  }
+
+  if (normalizedMessage.includes('user already registered') || normalizedMessage.includes('already registered')) {
+    return 'Tällä sähköpostilla on jo tili. Kokeile kirjautua sisään.';
+  }
+
+  if (normalizedMessage.includes('password')) {
+    return 'Salasana ei kelpaa. Kokeile pidempää salasanaa.';
+  }
+
+  if (normalizedMessage.includes('network')) {
+    return 'Yhteys ei toiminut. Tarkista internet-yhteys.';
+  }
+
+  return message;
+}
+
+export function KiertlyEmailAuthScreen({ onBack, onAuthenticated }: KiertlyEmailAuthScreenProps) {
   const [authMode, setAuthMode] = useState<AuthMode>('signUp');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,55 +64,119 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isSignUp = authMode === 'signUp';
 
-  function clearError() {
+  function clearMessages() {
     if (errorMessage) {
       setErrorMessage('');
+    }
+
+    if (successMessage) {
+      setSuccessMessage('');
     }
   }
 
   function changeAuthMode(nextMode: AuthMode) {
     setAuthMode(nextMode);
     setErrorMessage('');
+    setSuccessMessage('');
   }
 
-  function validateAndContinue() {
+  function validateForm() {
     const trimmedEmail = email.trim();
 
     if (!trimmedEmail) {
       setErrorMessage('Lisää sähköposti.');
-      return;
+      return false;
     }
 
     if (!isValidEmail(trimmedEmail)) {
       setErrorMessage('Kirjoita toimiva sähköpostiosoite.');
-      return;
+      return false;
     }
 
     if (!password) {
       setErrorMessage('Lisää salasana.');
-      return;
+      return false;
     }
 
     if (password.length < 6) {
       setErrorMessage('Salasanan pitää olla vähintään 6 merkkiä.');
-      return;
+      return false;
     }
 
     if (isSignUp && password !== confirmPassword) {
       setErrorMessage('Salasanat eivät täsmää.');
-      return;
+      return false;
     }
 
     if (isSignUp && !hasAcceptedTerms) {
       setErrorMessage('Hyväksy käyttöehdot jatkaaksesi.');
+      return false;
+    }
+
+    return true;
+  }
+
+  async function validateAndContinue() {
+    if (isSubmitting) {
       return;
     }
 
-    setErrorMessage('');
-    onContinue();
+    clearMessages();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    const trimmedEmail = email.trim();
+
+    setIsSubmitting(true);
+
+    try {
+      if (isSignUp) {
+        const { data, error } = await supabase.auth.signUp({
+          email: trimmedEmail,
+          password,
+        });
+
+        if (error) {
+          setErrorMessage(getAuthErrorMessage(error.message));
+          return;
+        }
+
+        if (data.session) {
+          onAuthenticated();
+          return;
+        }
+
+        setSuccessMessage('Tili luotu. Tarkista sähköposti ja vahvista tili ennen kirjautumista.');
+        setAuthMode('signIn');
+        setPassword('');
+        setConfirmPassword('');
+        setHasAcceptedTerms(false);
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      });
+
+      if (error) {
+        setErrorMessage(getAuthErrorMessage(error.message));
+        return;
+      }
+
+      onAuthenticated();
+    } catch {
+      setErrorMessage('Yhteys ei toiminut. Yritä uudelleen.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -121,13 +216,14 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
                 value={email}
                 onChangeText={(nextEmail) => {
                   setEmail(nextEmail);
-                  clearError();
+                  clearMessages();
                 }}
                 placeholder="Sähköposti"
                 placeholderTextColor={theme.colors.mutedText}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 textContentType="emailAddress"
+                editable={!isSubmitting}
                 style={styles.input}
               />
             </View>
@@ -138,12 +234,13 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
                 value={password}
                 onChangeText={(nextPassword) => {
                   setPassword(nextPassword);
-                  clearError();
+                  clearMessages();
                 }}
                 placeholder="Salasana"
                 placeholderTextColor={theme.colors.mutedText}
                 secureTextEntry={!isPasswordVisible}
                 textContentType="password"
+                editable={!isSubmitting}
                 style={styles.input}
               />
               <Pressable
@@ -168,12 +265,13 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
                   value={confirmPassword}
                   onChangeText={(nextConfirmPassword) => {
                     setConfirmPassword(nextConfirmPassword);
-                    clearError();
+                    clearMessages();
                   }}
                   placeholder="Vahvista salasana"
                   placeholderTextColor={theme.colors.mutedText}
                   secureTextEntry={!isConfirmPasswordVisible}
                   textContentType="password"
+                  editable={!isSubmitting}
                   style={styles.input}
                 />
                 <Pressable
@@ -198,7 +296,7 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
                 accessibilityState={{ checked: hasAcceptedTerms }}
                 onPress={() => {
                   setHasAcceptedTerms((currentValue) => !currentValue);
-                  clearError();
+                  clearMessages();
                 }}
                 style={styles.termsRow}
               >
@@ -220,13 +318,28 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
               </View>
             ) : null}
 
-            <Pressable accessibilityRole="button" onPress={validateAndContinue} style={styles.continueButton}>
-              <Text style={styles.continueText}>{isSignUp ? 'Jatka' : 'Kirjaudu'}</Text>
+            {successMessage ? (
+              <View style={styles.successBox}>
+                <Feather name="check-circle" size={17} color="#405032" strokeWidth={2} />
+                <Text style={styles.successText}>{successMessage}</Text>
+              </View>
+            ) : null}
+
+            <Pressable
+              accessibilityRole="button"
+              onPress={validateAndContinue}
+              disabled={isSubmitting}
+              style={[styles.continueButton, isSubmitting && styles.continueButtonDisabled]}
+            >
+              <Text style={styles.continueText}>
+                {isSubmitting ? 'Hetki...' : isSignUp ? 'Jatka' : 'Kirjaudu'}
+              </Text>
             </Pressable>
 
             <Pressable
               accessibilityRole="button"
               onPress={() => changeAuthMode(isSignUp ? 'signIn' : 'signUp')}
+              disabled={isSubmitting}
               hitSlop={12}
               style={styles.loginLinkWrap}
             >
@@ -363,12 +476,34 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
+  successBox: {
+    minHeight: 36,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: '#C9D8B8',
+    borderRadius: 12,
+    backgroundColor: '#EEF3E4',
+  },
+  successText: {
+    flex: 1,
+    color: '#405032',
+    fontSize: 13,
+    fontWeight: '700',
+  },
   continueButton: {
     height: 56,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 15,
     backgroundColor: '#405032',
+  },
+  continueButtonDisabled: {
+    opacity: 0.72,
   },
   continueText: {
     color: theme.colors.white,
