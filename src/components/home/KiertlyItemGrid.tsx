@@ -12,6 +12,8 @@ export type KiertlyGridItem = {
   likes: number;
   backgroundColor: string;
   imageUri?: string;
+  imageUris?: string[];
+  imagePaths?: string[];
   filterCategories?: HomeCategory[];
   categoryLabel?: string;
   detailDescription?: string;
