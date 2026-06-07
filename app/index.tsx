@@ -36,6 +36,7 @@ import {
   updateOwnItem,
   updateOwnItemAvailability,
 } from '../src/lib/items';
+import { deleteItemPhotos, uploadItemPhotos } from '../src/lib/itemPhotos';
 import { supabase } from '../src/lib/supabase';
 
 type ProfileSubscreen = 'main' | 'ownItems' | 'editItem';
@@ -154,7 +155,14 @@ export default function HomeScreen() {
       throw new Error('Kirjaudu sisään ennen tavaran lisäämistä.');
     }
 
-    const createdItem = await createOwnItem(item, session.user.id);
+    const uploadedPhotos = await uploadItemPhotos(item.imageUris ?? [], session.user.id, item.id);
+    const itemWithUploadedPhotos = {
+      ...item,
+      imageUri: uploadedPhotos.imageUris[0],
+      imageUris: uploadedPhotos.imageUris,
+      imagePaths: uploadedPhotos.imagePaths,
+    };
+    const createdItem = await createOwnItem(itemWithUploadedPhotos, session.user.id);
 
     setSharedItems((currentItems) => [createdItem, ...currentItems]);
     setActiveCategory('Kaikki');
@@ -190,7 +198,11 @@ export default function HomeScreen() {
 
   async function deleteItem(itemId: string) {
     try {
+      const itemToDelete = sharedItems.find((item) => item.id === itemId);
+
       await deleteOwnItem(itemId);
+      await deleteItemPhotos(itemToDelete?.imagePaths);
+
       setSharedItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
       setSelectedItem((currentItem) => (currentItem?.id === itemId ? undefined : currentItem));
     } catch {
