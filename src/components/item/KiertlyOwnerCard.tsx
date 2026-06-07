@@ -1,29 +1,40 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
 
 type KiertlyOwnerCardProps = {
   ownerName?: string;
+  locationLabel?: string;
 };
 
-export function KiertlyOwnerCard({ ownerName = 'Anna' }: KiertlyOwnerCardProps) {
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
+
+export function KiertlyOwnerCard({
+  ownerName = 'Kiertly-käyttäjä',
+  locationLabel = 'Sijainti lisäämättä',
+}: KiertlyOwnerCardProps) {
   return (
     <View style={styles.card}>
       <View style={styles.avatarWrap}>
-        <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=160&h=160&fit=crop' }}
-          style={styles.avatar}
-        />
+        <Text style={styles.avatarText}>{getInitials(ownerName)}</Text>
       </View>
 
       <View style={styles.textWrap}>
         <Text style={styles.name}>{ownerName}</Text>
-        <View style={styles.trustRow}>
-          <Feather name="shield" size={13} color={theme.colors.primary} />
-          <Text style={styles.trustText}>Luotettava lainaaja</Text>
+        <View style={styles.locationRow}>
+          <Feather name="map-pin" size={13} color={theme.colors.primary} />
+          <Text numberOfLines={1} style={styles.locationText}>{locationLabel}</Text>
         </View>
-        <Text style={styles.responseText}>Vastaa yleensä 30 min sisällä</Text>
+        <Text style={styles.helperText}>Lähetä viesti sopiaksesi noudosta ja palautuksesta.</Text>
       </View>
 
       <Feather name="chevron-right" size={24} color={theme.colors.text} />
@@ -47,13 +58,15 @@ const styles = StyleSheet.create({
   avatarWrap: {
     width: 50,
     height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: theme.radius.pill,
-    overflow: 'hidden',
-    backgroundColor: theme.colors.border,
+    backgroundColor: '#EEF3E4',
   },
-  avatar: {
-    width: '100%',
-    height: '100%',
+  avatarText: {
+    color: theme.colors.primary,
+    fontSize: 17,
+    fontWeight: '800',
   },
   textWrap: {
     flex: 1,
@@ -64,18 +77,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '800',
   },
-  trustRow: {
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     marginTop: 2,
   },
-  trustText: {
+  locationText: {
+    flex: 1,
     color: theme.colors.mutedText,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  responseText: {
+  helperText: {
     marginTop: 2,
     color: theme.colors.mutedText,
     fontSize: 12,
