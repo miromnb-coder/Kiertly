@@ -17,6 +17,8 @@ export type KiertlyGridItem = {
   filterCategories?: HomeCategory[];
   categoryLabel?: string;
   detailDescription?: string;
+  locationLabel?: string;
+  createdAt?: string;
   ownerId?: string;
   ownerName?: string;
   isAvailable?: boolean;
@@ -26,11 +28,12 @@ export const kiertlyDefaultItems: KiertlyGridItem[] = [
   {
     id: 'drill',
     title: 'Akkuporakone Bosch',
-    meta: 'Lainaa naapurilta • 2,4 km',
+    meta: 'Lainaa naapurilta • Helsinki, Töölö',
     highlight: 'Lainaa ilmaiseksi',
     likes: 12,
     backgroundColor: '#E7DDC9',
     categoryLabel: 'Työkalut',
+    locationLabel: 'Helsinki, Töölö',
     isAvailable: true,
     detailDescription:
       'Tehokas ja kevyt Boschin akkuporakone sopii kotiprojekteihin kuin pieniin remontteihin. Mukana akku ja laturi. Voin tarvittaessa neuvoa käytössä. Noudettavissa joustavasti.',
@@ -38,11 +41,12 @@ export const kiertlyDefaultItems: KiertlyGridItem[] = [
   {
     id: 'suitcase',
     title: 'Matkalaukku',
-    meta: 'Vuokraa helposti • 3,1 km',
+    meta: 'Vuokraa helposti • Helsinki, Kamppi',
     highlight: '4 € / päivä',
     likes: 7,
     backgroundColor: '#EFE5D6',
     categoryLabel: 'Matkailu',
+    locationLabel: 'Helsinki, Kamppi',
     isAvailable: true,
     detailDescription:
       'Siisti ja kevyt matkalaukku viikonloppureissuille tai pidemmälle matkalle. Nouto onnistuu joustavasti lähialueelta.',
@@ -50,11 +54,12 @@ export const kiertlyDefaultItems: KiertlyGridItem[] = [
   {
     id: 'chairs',
     title: 'Retkituolit 2 kpl',
-    meta: 'Vaihda tai lainaa • 1,7 km',
+    meta: 'Vaihda tai lainaa • Helsinki, Punavuori',
     highlight: 'Vaihda',
     likes: 5,
     backgroundColor: '#DDE4D0',
     categoryLabel: 'Retkeily',
+    locationLabel: 'Helsinki, Punavuori',
     isAvailable: true,
     detailDescription:
       'Kaksi kokoontaitettavaa retkituolia mökille, piknikille tai retkelle. Kevyet kantaa ja helppo pakata mukaan.',
@@ -62,11 +67,12 @@ export const kiertlyDefaultItems: KiertlyGridItem[] = [
   {
     id: 'speaker',
     title: 'Bluetooth-kaiutin',
-    meta: 'Vuokraa lähialueelta • 0,8 km',
+    meta: 'Vuokraa lähialueelta • Helsinki, Kallio',
     highlight: '2 € / päivä',
     likes: 9,
     backgroundColor: '#E4DED3',
     categoryLabel: 'Elektroniikka',
+    locationLabel: 'Helsinki, Kallio',
     isAvailable: true,
     detailDescription:
       'Pieni mutta tehokas bluetooth-kaiutin juhliin, mökille tai piknikille. Akku kestää hyvin yhden päivän käytön.',
@@ -87,6 +93,20 @@ type KiertlyItemGridProps = {
   sharedItems: KiertlyGridItem[];
   onItemPress: (item: KiertlyGridItem) => void;
 };
+
+function getDisplayMeta(item: KiertlyGridItem) {
+  if (!item.locationLabel) {
+    return item.meta;
+  }
+
+  const methodText = item.meta.split('•')[0]?.trim();
+
+  if (methodText) {
+    return `${methodText} • ${item.locationLabel}`;
+  }
+
+  return item.locationLabel;
+}
 
 export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: KiertlyItemGridProps) {
   const baseItems = itemsByCategory[activeCategory];
@@ -141,7 +161,7 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
                 {item.title}
               </Text>
               <Text numberOfLines={1} style={styles.meta}>
-                {item.meta}
+                {getDisplayMeta(item)}
               </Text>
               <Text numberOfLines={1} style={styles.highlight}>
                 {item.isAvailable === false ? 'Ei saatavilla juuri nyt' : item.highlight}
