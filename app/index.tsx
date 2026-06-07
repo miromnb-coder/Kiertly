@@ -21,6 +21,7 @@ import { KiertlyItemDetailScreen } from '../src/components/item/KiertlyItemDetai
 import { KiertlyChatScreen } from '../src/components/messages/KiertlyChatScreen';
 import { KiertlyMessagesScreen, type MessageThread } from '../src/components/messages/KiertlyMessagesScreen';
 import { KiertlyEditItemScreen } from '../src/components/profile/KiertlyEditItemScreen';
+import { KiertlyEditProfileScreen } from '../src/components/profile/KiertlyEditProfileScreen';
 import { KiertlyOwnItemsScreen } from '../src/components/profile/KiertlyOwnItemsScreen';
 import { KiertlyProfileScreen } from '../src/components/profile/KiertlyProfileScreen';
 import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
@@ -38,14 +39,19 @@ import {
   updateOwnItemAvailability,
 } from '../src/lib/items';
 import { deleteItemPhotos, uploadItemPhotos } from '../src/lib/itemPhotos';
-import { fetchOwnProfile, type KiertlyProfile } from '../src/lib/profiles';
+import {
+  fetchOwnProfile,
+  updateOwnProfile,
+  type KiertlyProfile,
+  type UpdateOwnProfileInput,
+} from '../src/lib/profiles';
 import {
   createBorrowRequestThread,
   fetchMessageThreads,
 } from '../src/lib/requests';
 import { supabase } from '../src/lib/supabase';
 
-type ProfileSubscreen = 'main' | 'ownItems' | 'editItem';
+type ProfileSubscreen = 'main' | 'ownItems' | 'editItem' | 'editProfile';
 type AuthScreen = 'start' | 'email';
 
 export default function HomeScreen() {
@@ -298,6 +304,17 @@ export default function HomeScreen() {
     setProfileSubscreen('ownItems');
   }
 
+  async function saveProfile(updates: UpdateOwnProfileInput) {
+    if (!session?.user.id) {
+      throw new Error('Kirjaudu sisään ennen profiilin muokkaamista.');
+    }
+
+    const updatedProfile = await updateOwnProfile(session.user.id, updates);
+
+    setProfile(updatedProfile);
+    setProfileSubscreen('main');
+  }
+
   async function deleteItem(itemId: string) {
     try {
       const itemToDelete = ownItems.find((item) => item.id === itemId);
@@ -395,6 +412,17 @@ export default function HomeScreen() {
     }
 
     if (activeTab === 'profile') {
+      if (profileSubscreen === 'editProfile' && profile) {
+        return (
+          <KiertlyEditProfileScreen
+            profile={profile}
+            userEmail={userEmail}
+            onBack={() => setProfileSubscreen('main')}
+            onSave={saveProfile}
+          />
+        );
+      }
+
       if (profileSubscreen === 'editItem' && editingItem) {
         return (
           <KiertlyEditItemScreen
@@ -424,6 +452,7 @@ export default function HomeScreen() {
             sharedItemCount={ownItems.length}
             profile={profile}
             userEmail={userEmail}
+            onEditProfilePress={() => setProfileSubscreen('editProfile')}
             onOwnItemsPress={() => setProfileSubscreen('ownItems')}
             onSignOut={signOut}
           />
