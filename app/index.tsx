@@ -13,6 +13,7 @@ import { KiertlyItemGrid, type KiertlyGridItem } from '../src/components/home/Ki
 import { KiertlyItemDetailScreen } from '../src/components/item/KiertlyItemDetailScreen';
 import { KiertlyChatScreen } from '../src/components/messages/KiertlyChatScreen';
 import { KiertlyMessagesScreen, type MessageThread } from '../src/components/messages/KiertlyMessagesScreen';
+import { KiertlyEditItemScreen } from '../src/components/profile/KiertlyEditItemScreen';
 import { KiertlyOwnItemsScreen } from '../src/components/profile/KiertlyOwnItemsScreen';
 import { KiertlyProfileScreen } from '../src/components/profile/KiertlyProfileScreen';
 import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
@@ -22,7 +23,7 @@ import { KiertlySearchTabs } from '../src/components/search/KiertlySearchTabs';
 import { KiertlyShareScreen } from '../src/components/share/KiertlyShareScreen';
 import { theme } from '../src/constants/theme';
 
-type ProfileSubscreen = 'main' | 'ownItems';
+type ProfileSubscreen = 'main' | 'ownItems' | 'editItem';
 
 export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState<BottomTabKey>('home');
@@ -34,6 +35,7 @@ export default function HomeScreen() {
   const [selectedItem, setSelectedItem] = useState<KiertlyGridItem | undefined>();
   const [selectedThread, setSelectedThread] = useState<MessageThread | undefined>();
   const [profileSubscreen, setProfileSubscreen] = useState<ProfileSubscreen>('main');
+  const [editingItem, setEditingItem] = useState<KiertlyGridItem | undefined>();
 
   function closeSearch() {
     setIsSearchOpen(false);
@@ -57,8 +59,44 @@ export default function HomeScreen() {
   function handleTabPress(tab: BottomTabKey) {
     setSelectedItem(undefined);
     setSelectedThread(undefined);
+    setEditingItem(undefined);
     setProfileSubscreen('main');
     setActiveTab(tab);
+  }
+
+  function editItem(item: KiertlyGridItem) {
+    setEditingItem(item);
+    setProfileSubscreen('editItem');
+  }
+
+  function saveItem(updatedItem: KiertlyGridItem) {
+    setSharedItems((currentItems) =>
+      currentItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
+    );
+    setSelectedItem((currentItem) =>
+      currentItem?.id === updatedItem.id ? updatedItem : currentItem,
+    );
+    setEditingItem(undefined);
+    setProfileSubscreen('ownItems');
+  }
+
+  function deleteItem(itemId: string) {
+    setSharedItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
+    setSelectedItem((currentItem) => (currentItem?.id === itemId ? undefined : currentItem));
+  }
+
+  function toggleAvailability(itemToToggle: KiertlyGridItem) {
+    const updatedItem = {
+      ...itemToToggle,
+      isAvailable: itemToToggle.isAvailable === false,
+    };
+
+    setSharedItems((currentItems) =>
+      currentItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
+    );
+    setSelectedItem((currentItem) =>
+      currentItem?.id === updatedItem.id ? updatedItem : currentItem,
+    );
   }
 
   function renderMainContent() {
@@ -76,12 +114,25 @@ export default function HomeScreen() {
     }
 
     if (activeTab === 'profile') {
+      if (profileSubscreen === 'editItem' && editingItem) {
+        return (
+          <KiertlyEditItemScreen
+            item={editingItem}
+            onBack={() => setProfileSubscreen('ownItems')}
+            onSave={saveItem}
+          />
+        );
+      }
+
       if (profileSubscreen === 'ownItems') {
         return (
           <KiertlyOwnItemsScreen
             items={sharedItems}
             onBack={() => setProfileSubscreen('main')}
             onItemPress={setSelectedItem}
+            onEditItem={editItem}
+            onDeleteItem={deleteItem}
+            onToggleAvailability={toggleAvailability}
           />
         );
       }
