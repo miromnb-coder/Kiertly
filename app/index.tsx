@@ -12,6 +12,7 @@ import {
 import { KiertlyItemGrid, type KiertlyGridItem } from '../src/components/home/KiertlyItemGrid';
 import { KiertlyItemDetailScreen } from '../src/components/item/KiertlyItemDetailScreen';
 import { KiertlyMessagesScreen } from '../src/components/messages/KiertlyMessagesScreen';
+import { KiertlyProfileScreen } from '../src/components/profile/KiertlyProfileScreen';
 import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
 import { KiertlySearchEmptyState } from '../src/components/search/KiertlySearchEmptyState';
 import { KiertlySearchHeader, type KiertlySearchMode } from '../src/components/search/KiertlySearchHeader';
@@ -62,6 +63,14 @@ export default function HomeScreen() {
 
     if (activeTab === 'messages') {
       return <KiertlyMessagesScreen />;
+    }
+
+    if (activeTab === 'profile') {
+      return (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.pageContent}>
+          <KiertlyProfileScreen />
+        </ScrollView>
+      );
     }
 
     return (
