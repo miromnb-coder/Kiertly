@@ -9,7 +9,8 @@ type KiertlyAuthStartScreenProps = {
   onEmailContinue: () => void;
 };
 
-const googleLogoUri = 'https://developers.google.com/identity/images/g-logo.png';
+const googleLogoUri =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/96px-Google_%22G%22_logo.svg.png';
 
 export function KiertlyAuthStartScreen({
   onAppleContinue,
@@ -150,6 +151,7 @@ const styles = StyleSheet.create({
   googleLogo: {
     width: 28,
     height: 28,
+    backgroundColor: 'transparent',
   },
   googleButtonText: {
     color: '#405032',
