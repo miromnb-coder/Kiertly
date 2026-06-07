@@ -66,6 +66,7 @@ function rowToThread(row: MessageThreadRow, currentUserId: string): MessageThrea
 
   return {
     id: row.id,
+    itemId: row.item_id,
     name: otherName,
     itemTitle: row.items?.title || 'Tavara',
     preview: latestMessage?.body || 'Uusi lainapyyntö',
