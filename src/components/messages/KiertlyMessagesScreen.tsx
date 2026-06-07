@@ -18,75 +18,11 @@ export type MessageThread = {
 };
 
 type KiertlyMessagesScreenProps = {
+  threads: MessageThread[];
   onThreadPress: (thread: MessageThread) => void;
 };
 
-const categoryImageBaseUrl =
-  'https://raw.githubusercontent.com/miromnb-coder/Kiertly/main/assets/categories';
-
-const messageThreads: MessageThread[] = [
-  {
-    id: 'anna-drill',
-    name: 'Anna',
-    itemTitle: 'Akkuporakone Bosch',
-    preview: 'Hei! Onko porakone vielä saatavilla ensi viikolla?',
-    time: '10.24',
-    avatarUri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&crop=faces',
-    itemImageUri: `${categoryImageBaseUrl}/tools.PNG`,
-    itemHighlight: 'Lainaa ilmaiseksi',
-    distance: '2,4 km',
-    isOnline: true,
-    unreadCount: 1,
-  },
-  {
-    id: 'mikko-suitcase',
-    name: 'Mikko',
-    itemTitle: 'Matkalaukku',
-    preview: 'Kiitos! Nouto sopii minulle torstaina iltapäivällä.',
-    time: '09.48',
-    avatarUri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&crop=faces',
-    itemImageUri: `${categoryImageBaseUrl}/travel.PNG`,
-    itemHighlight: '4 € / päivä',
-    distance: '3,1 km',
-    isOnline: true,
-  },
-  {
-    id: 'laura-speaker',
-    name: 'Laura',
-    itemTitle: 'Bluetooth-kaiutin',
-    preview: 'Kaiutin toimi tosi hyvin, kiitos lainasta! ⭐',
-    time: 'Eilen',
-    avatarUri: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces',
-    itemImageUri: `${categoryImageBaseUrl}/electronics.PNG`,
-    itemHighlight: '2 € / päivä',
-    distance: '0,8 km',
-    isOnline: true,
-  },
-  {
-    id: 'joni-chairs',
-    name: 'Joni',
-    itemTitle: 'Retkituolit 2 kpl',
-    preview: 'Sovitaan kohtaamispaikka huomiselle.',
-    time: 'Pe',
-    avatarUri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=faces',
-    itemImageUri: `${categoryImageBaseUrl}/camping.PNG`,
-    itemHighlight: 'Vaihda',
-    distance: '1,7 km',
-  },
-  {
-    id: 'sofia-party',
-    name: 'Sofia',
-    itemTitle: 'Juhlat',
-    preview: 'Moi! Laitoin vielä viestin yksityiskohdista 😊',
-    time: 'Pe',
-    avatarUri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=faces',
-    itemImageUri: `${categoryImageBaseUrl}/party.PNG`,
-    itemHighlight: 'Vaihda',
-    distance: '1,2 km',
-  },
-];
-
-export function KiertlyMessagesScreen({ onThreadPress }: KiertlyMessagesScreenProps) {
+export function KiertlyMessagesScreen({ threads, onThreadPress }: KiertlyMessagesScreenProps) {
   return (
     <View style={styles.screenContent}>
       <View style={styles.header}>
@@ -101,40 +37,52 @@ export function KiertlyMessagesScreen({ onThreadPress }: KiertlyMessagesScreenPr
         <Text style={styles.searchText}>Hae keskusteluja</Text>
       </View>
 
-      <View style={styles.threadList}>
-        {messageThreads.map((thread) => (
-          <Pressable
-            key={thread.id}
-            accessibilityRole="button"
-            onPress={() => onThreadPress(thread)}
-            style={styles.threadRow}
-          >
-            <View style={styles.avatarWrap}>
-              <Image source={{ uri: thread.avatarUri }} style={styles.avatar} />
-              {thread.isOnline ? <View style={styles.onlineDot} /> : null}
-            </View>
-
-            <View style={styles.threadContent}>
-              <View style={styles.threadTopRow}>
-                <View style={styles.threadTitleWrap}>
-                  <Text numberOfLines={1} style={styles.name}>{thread.name}</Text>
-                  <Text numberOfLines={1} style={styles.itemTitle}>{thread.itemTitle}</Text>
-                </View>
-                <View style={styles.rightMeta}>
-                  <Text style={styles.time}>{thread.time}</Text>
-                  {thread.unreadCount ? (
-                    <View style={styles.unreadBadge}>
-                      <Text style={styles.unreadText}>{thread.unreadCount}</Text>
-                    </View>
-                  ) : null}
-                </View>
+      {threads.length === 0 ? (
+        <View style={styles.emptyState}>
+          <View style={styles.emptyIconCircle}>
+            <Feather name="message-circle" size={40} color={theme.colors.primary} strokeWidth={1.8} />
+          </View>
+          <Text style={styles.emptyTitle}>Ei vielä keskusteluja</Text>
+          <Text style={styles.emptyDescription}>
+            Kun pyydät tavaraa lainaan tai joku pyytää sinun tavaraasi, keskustelu ilmestyy tänne.
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.threadList}>
+          {threads.map((thread) => (
+            <Pressable
+              key={thread.id}
+              accessibilityRole="button"
+              onPress={() => onThreadPress(thread)}
+              style={styles.threadRow}
+            >
+              <View style={styles.avatarWrap}>
+                <Image source={{ uri: thread.avatarUri }} style={styles.avatar} />
+                {thread.isOnline ? <View style={styles.onlineDot} /> : null}
               </View>
 
-              <Text numberOfLines={2} style={styles.preview}>{thread.preview}</Text>
-            </View>
-          </Pressable>
-        ))}
-      </View>
+              <View style={styles.threadContent}>
+                <View style={styles.threadTopRow}>
+                  <View style={styles.threadTitleWrap}>
+                    <Text numberOfLines={1} style={styles.name}>{thread.name}</Text>
+                    <Text numberOfLines={1} style={styles.itemTitle}>{thread.itemTitle}</Text>
+                  </View>
+                  <View style={styles.rightMeta}>
+                    <Text style={styles.time}>{thread.time}</Text>
+                    {thread.unreadCount ? (
+                      <View style={styles.unreadBadge}>
+                        <Text style={styles.unreadText}>{thread.unreadCount}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                </View>
+
+                <Text numberOfLines={2} style={styles.preview}>{thread.preview}</Text>
+              </View>
+            </Pressable>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -178,6 +126,34 @@ const styles = StyleSheet.create({
     color: theme.colors.mutedText,
     fontSize: 16,
     fontWeight: '500',
+  },
+  emptyState: {
+    minHeight: 430,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: theme.spacing.xl,
+  },
+  emptyIconCircle: {
+    width: 86,
+    height: 86,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing.lg,
+    borderRadius: theme.radius.pill,
+    backgroundColor: '#EEF3E4',
+  },
+  emptyTitle: {
+    marginBottom: theme.spacing.sm,
+    color: theme.colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    color: theme.colors.mutedText,
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
   },
   threadList: {
     borderTopWidth: 1,
