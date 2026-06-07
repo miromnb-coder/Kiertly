@@ -44,6 +44,20 @@ function normalize(value: string) {
   return value.toLowerCase().trim();
 }
 
+function getDisplayMeta(item: KiertlyGridItem) {
+  if (!item.locationLabel) {
+    return item.meta;
+  }
+
+  const methodText = item.meta.split('•')[0]?.trim();
+
+  if (methodText) {
+    return `${methodText} • ${item.locationLabel}`;
+  }
+
+  return item.locationLabel;
+}
+
 function itemMatchesQuery(item: KiertlyGridItem, query: string) {
   const normalizedQuery = normalize(query);
 
@@ -55,6 +69,7 @@ function itemMatchesQuery(item: KiertlyGridItem, query: string) {
     [
       item.title,
       item.meta,
+      item.locationLabel,
       item.highlight,
       item.categoryLabel,
       item.detailDescription,
@@ -168,7 +183,7 @@ export function KiertlySearchResults({ mode, query, items, onItemPress }: Kiertl
               ) : null}
             </View>
             <Text numberOfLines={1} style={styles.itemTitle}>{item.title}</Text>
-            <Text numberOfLines={1} style={styles.itemMeta}>{item.meta}</Text>
+            <Text numberOfLines={1} style={styles.itemMeta}>{getDisplayMeta(item)}</Text>
             <Text numberOfLines={1} style={styles.itemHighlight}>
               {item.isAvailable === false ? 'Ei saatavilla juuri nyt' : item.highlight}
             </Text>
@@ -259,16 +274,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   itemTitle: {
-    marginTop: 8,
+    marginTop: theme.spacing.sm,
     color: theme.colors.text,
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   itemMeta: {
     marginTop: 3,
     color: theme.colors.mutedText,
     fontSize: 11,
-    lineHeight: 14,
   },
   itemHighlight: {
     marginTop: 5,
@@ -293,11 +307,9 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.border,
   },
   memberTextWrap: {
     flex: 1,
-    minWidth: 0,
   },
   memberName: {
     color: theme.colors.text,
@@ -308,6 +320,5 @@ const styles = StyleSheet.create({
     marginTop: 3,
     color: theme.colors.mutedText,
     fontSize: 13,
-    fontWeight: '600',
   },
 });
