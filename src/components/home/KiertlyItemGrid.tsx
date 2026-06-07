@@ -16,6 +16,7 @@ export type KiertlyGridItem = {
   categoryLabel?: string;
   detailDescription?: string;
   ownerName?: string;
+  isAvailable?: boolean;
 };
 
 const allItems: KiertlyGridItem[] = [
@@ -27,6 +28,7 @@ const allItems: KiertlyGridItem[] = [
     likes: 12,
     backgroundColor: '#E7DDC9',
     categoryLabel: 'Työkalut',
+    isAvailable: true,
     detailDescription:
       'Tehokas ja kevyt Boschin akkuporakone sopii kotiprojekteihin kuin pieniin remontteihin. Mukana akku ja laturi. Voin tarvittaessa neuvoa käytössä. Noudettavissa joustavasti.',
   },
@@ -38,6 +40,7 @@ const allItems: KiertlyGridItem[] = [
     likes: 7,
     backgroundColor: '#EFE5D6',
     categoryLabel: 'Matkailu',
+    isAvailable: true,
     detailDescription:
       'Siisti ja kevyt matkalaukku viikonloppureissuille tai pidemmälle matkalle. Nouto onnistuu joustavasti lähialueelta.',
   },
@@ -49,6 +52,7 @@ const allItems: KiertlyGridItem[] = [
     likes: 5,
     backgroundColor: '#DDE4D0',
     categoryLabel: 'Retkeily',
+    isAvailable: true,
     detailDescription:
       'Kaksi kokoontaitettavaa retkituolia mökille, piknikille tai retkelle. Kevyet kantaa ja helppo pakata mukaan.',
   },
@@ -60,6 +64,7 @@ const allItems: KiertlyGridItem[] = [
     likes: 9,
     backgroundColor: '#E4DED3',
     categoryLabel: 'Elektroniikka',
+    isAvailable: true,
     detailDescription:
       'Pieni mutta tehokas bluetooth-kaiutin juhliin, mökille tai piknikille. Akku kestää hyvin yhden päivän käytön.',
   },
@@ -116,6 +121,11 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
             {item.imageUri ? (
               <Image source={{ uri: item.imageUri }} style={styles.itemPhoto} resizeMode="cover" />
             ) : null}
+            {item.isAvailable === false ? (
+              <View style={styles.unavailableOverlay}>
+                <Text style={styles.unavailableText}>Varattu</Text>
+              </View>
+            ) : null}
             <View style={styles.likesPill}>
               <Feather name="heart" size={14} color={theme.colors.text} />
               <Text style={styles.likesText}>{item.likes}</Text>
@@ -131,7 +141,7 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
                 {item.meta}
               </Text>
               <Text numberOfLines={1} style={styles.highlight}>
-                {item.highlight}
+                {item.isAvailable === false ? 'Ei saatavilla juuri nyt' : item.highlight}
               </Text>
             </View>
             <Feather name="more-vertical" size={18} color={theme.colors.text} />
@@ -163,6 +173,22 @@ const styles = StyleSheet.create({
   itemPhoto: {
     width: '100%',
     height: '100%',
+  },
+  unavailableOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(31, 36, 24, 0.45)',
+  },
+  unavailableText: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: theme.radius.pill,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    color: theme.colors.text,
+    fontSize: 13,
+    fontWeight: '800',
   },
   likesPill: {
     position: 'absolute',
