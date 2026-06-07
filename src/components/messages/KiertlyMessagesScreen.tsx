@@ -2,10 +2,16 @@ import { Feather } from '@expo/vector-icons';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
+import type { BorrowRequestStatus } from '../../lib/requests';
 
 export type MessageThread = {
   id: string;
   itemId?: string;
+  requestId?: string;
+  ownerId?: string;
+  requesterId?: string;
+  requestStatus?: BorrowRequestStatus;
+  isOwner?: boolean;
   name: string;
   itemTitle: string;
   preview: string;
@@ -22,6 +28,26 @@ type KiertlyMessagesScreenProps = {
   threads: MessageThread[];
   onThreadPress: (thread: MessageThread) => void;
 };
+
+function getStatusLabel(status?: BorrowRequestStatus) {
+  if (status === 'accepted') {
+    return 'Hyväksytty';
+  }
+
+  if (status === 'declined') {
+    return 'Hylätty';
+  }
+
+  if (status === 'cancelled') {
+    return 'Peruttu';
+  }
+
+  if (status === 'completed') {
+    return 'Palautettu';
+  }
+
+  return 'Odottaa';
+}
 
 export function KiertlyMessagesScreen({ threads, onThreadPress }: KiertlyMessagesScreenProps) {
   return (
@@ -76,6 +102,16 @@ export function KiertlyMessagesScreen({ threads, onThreadPress }: KiertlyMessage
                       </View>
                     ) : null}
                   </View>
+                </View>
+
+                <View style={styles.statusRow}>
+                  <View style={styles.statusPill}>
+                    <View style={styles.statusDot} />
+                    <Text style={styles.statusText}>{getStatusLabel(thread.requestStatus)}</Text>
+                  </View>
+                  <Text numberOfLines={1} style={styles.roleText}>
+                    {thread.isOwner ? 'Sinulle tullut pyyntö' : 'Lähettämäsi pyyntö'}
+                  </Text>
                 </View>
 
                 <Text numberOfLines={2} style={styles.preview}>{thread.preview}</Text>
@@ -233,6 +269,38 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
     fontSize: 12,
     fontWeight: '800',
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+    marginTop: theme.spacing.sm,
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: theme.radius.pill,
+    backgroundColor: '#EEF3E4',
+  },
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primary,
+  },
+  statusText: {
+    color: theme.colors.primary,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  roleText: {
+    flex: 1,
+    color: theme.colors.mutedText,
+    fontSize: 12,
+    fontWeight: '600',
   },
   preview: {
     marginTop: theme.spacing.xs,
