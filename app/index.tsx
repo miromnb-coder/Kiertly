@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 're
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { KiertlyAuthStartScreen } from '../src/components/auth/KiertlyAuthStartScreen';
+import { KiertlyEmailAuthScreen } from '../src/components/auth/KiertlyEmailAuthScreen';
 import { KiertlyBottomTabBar, type BottomTabKey } from '../src/components/KiertlyBottomTabBar';
 import { KiertlyBrowseHeader } from '../src/components/browse/KiertlyBrowseHeader';
 import { KiertlyCategoryGrid } from '../src/components/browse/KiertlyCategoryGrid';
@@ -29,9 +30,11 @@ import { KiertlyShareScreen } from '../src/components/share/KiertlyShareScreen';
 import { theme } from '../src/constants/theme';
 
 type ProfileSubscreen = 'main' | 'ownItems' | 'editItem';
+type AuthScreen = 'start' | 'email';
 
 export default function HomeScreen() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authScreen, setAuthScreen] = useState<AuthScreen>('start');
   const [activeTab, setActiveTab] = useState<BottomTabKey>('home');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeSearchTab, setActiveSearchTab] = useState<KiertlySearchMode>('products');
@@ -181,11 +184,20 @@ export default function HomeScreen() {
   }
 
   if (!isAuthenticated) {
+    if (authScreen === 'email') {
+      return (
+        <KiertlyEmailAuthScreen
+          onBack={() => setAuthScreen('start')}
+          onContinue={completeMockAuth}
+        />
+      );
+    }
+
     return (
       <KiertlyAuthStartScreen
         onAppleContinue={completeMockAuth}
         onGoogleContinue={completeMockAuth}
-        onEmailContinue={completeMockAuth}
+        onEmailContinue={() => setAuthScreen('email')}
       />
     );
   }
