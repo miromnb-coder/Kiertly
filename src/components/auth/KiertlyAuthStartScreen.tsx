@@ -9,6 +9,25 @@ type KiertlyAuthStartScreenProps = {
   onEmailContinue: () => void;
 };
 
+function GoogleGlyph() {
+  return (
+    <View style={styles.googleGlyph}>
+      <View style={[styles.googleGlyphClip, styles.googleRedClip]}>
+        <Text style={[styles.googleGlyphLetter, styles.googleRed]}>G</Text>
+      </View>
+      <View style={[styles.googleGlyphClip, styles.googleYellowClip]}>
+        <Text style={[styles.googleGlyphLetter, styles.googleYellow]}>G</Text>
+      </View>
+      <View style={[styles.googleGlyphClip, styles.googleGreenClip]}>
+        <Text style={[styles.googleGlyphLetter, styles.googleGreen]}>G</Text>
+      </View>
+      <View style={[styles.googleGlyphClip, styles.googleBlueClip]}>
+        <Text style={[styles.googleGlyphLetter, styles.googleBlue]}>G</Text>
+      </View>
+    </View>
+  );
+}
+
 export function KiertlyAuthStartScreen({
   onAppleContinue,
   onGoogleContinue,
@@ -45,7 +64,7 @@ export function KiertlyAuthStartScreen({
             onPress={onGoogleContinue}
             style={styles.googleButton}
           >
-            <Text style={styles.googleIcon}>G</Text>
+            <GoogleGlyph />
             <Text style={styles.googleButtonText}>Jatka Google-tilillä</Text>
           </Pressable>
 
@@ -72,21 +91,22 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'space-between',
-    paddingHorizontal: 32,
+    paddingHorizontal: 34,
     paddingTop: 92,
-    paddingBottom: 68,
+    paddingBottom: 74,
   },
   brandWrap: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: 56,
+    paddingBottom: 86,
   },
   brand: {
     color: '#405032',
-    fontSize: 62,
-    fontWeight: '700',
-    letterSpacing: -1.2,
+    fontFamily: 'Georgia',
+    fontSize: 72,
+    fontWeight: '600',
+    letterSpacing: -1.5,
   },
   tagline: {
     marginTop: 14,
@@ -99,28 +119,28 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   appleButton: {
-    height: 64,
+    height: 58,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 14,
-    borderRadius: theme.radius.md,
+    borderRadius: 16,
     backgroundColor: '#101412',
   },
   appleIcon: {
     color: theme.colors.white,
-    fontSize: 34,
-    lineHeight: 38,
+    fontSize: 31,
+    lineHeight: 35,
   },
   appleButtonText: {
     color: theme.colors.white,
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '700',
   },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 18,
+    gap: 20,
     marginVertical: 24,
   },
   dividerLine: {
@@ -134,24 +154,72 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   googleButton: {
-    height: 64,
+    height: 58,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 16,
     borderWidth: 1.5,
     borderColor: '#4D603C',
-    borderRadius: theme.radius.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.36)',
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.28)',
   },
-  googleIcon: {
+  googleGlyph: {
+    position: 'relative',
+    width: 34,
+    height: 34,
+  },
+  googleGlyphClip: {
+    position: 'absolute',
+    overflow: 'hidden',
+  },
+  googleGlyphLetter: {
+    position: 'absolute',
+    top: -4,
+    left: 0,
+    fontSize: 32,
+    fontWeight: '900',
+    lineHeight: 38,
+  },
+  googleRedClip: {
+    top: 0,
+    left: 0,
+    width: 34,
+    height: 11,
+  },
+  googleYellowClip: {
+    top: 10,
+    left: 0,
+    width: 17,
+    height: 13,
+  },
+  googleGreenClip: {
+    top: 20,
+    left: 0,
+    width: 23,
+    height: 14,
+  },
+  googleBlueClip: {
+    top: 10,
+    right: 0,
+    width: 19,
+    height: 24,
+  },
+  googleRed: {
+    color: '#DB4437',
+  },
+  googleYellow: {
+    color: '#F4B400',
+  },
+  googleGreen: {
+    color: '#0F9D58',
+  },
+  googleBlue: {
     color: '#4285F4',
-    fontSize: 28,
-    fontWeight: '800',
   },
   googleButtonText: {
     color: '#405032',
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '700',
   },
   emailButton: {
