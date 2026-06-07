@@ -64,6 +64,7 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [locationLabel, setLocationLabel] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ShareCategory | undefined>();
   const [selectedPhotos, setSelectedPhotos] = useState<SelectedPhoto[]>([]);
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
@@ -121,6 +122,7 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
 
     const trimmedTitle = title.trim();
     const trimmedPrice = price.trim();
+    const trimmedLocation = locationLabel.trim();
     const selectedPhotoUris = selectedPhotos.map((photo) => photo.uri);
 
     if (selectedPhotos.length === 0) {
@@ -138,6 +140,11 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
       return;
     }
 
+    if (!trimmedLocation) {
+      Alert.alert('Lisää sijainti', 'Kirjoita tavaralle alue, esimerkiksi Helsinki, Kallio.');
+      return;
+    }
+
     if (shouldShowPrice && !trimmedPrice) {
       Alert.alert('Lisää hinta', 'Kirjoita hinta tälle jakotavalle.');
       return;
@@ -146,7 +153,7 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
     const newItem: KiertlyGridItem = {
       id: `shared-${Date.now()}`,
       title: trimmedTitle,
-      meta: `${selectedMethod} • ${selectedCategory}`,
+      meta: `${selectedMethod} • ${trimmedLocation}`,
       highlight: getHighlight(selectedMethod, trimmedPrice),
       likes: 0,
       backgroundColor: '#EFE5D6',
@@ -156,6 +163,7 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
       filterCategories: getFilterCategories(selectedMethod),
       categoryLabel: selectedCategory,
       detailDescription: description.trim(),
+      locationLabel: trimmedLocation,
       ownerName: 'Sinä',
       isAvailable: true,
     };
@@ -228,7 +236,12 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
                 keyboardType="decimal-pad"
               />
             ) : null}
-            <KiertlyFormRow label="Sijainti" value="Valitse sijainti" showChevron />
+            <KiertlyFormField
+              label="Sijainti"
+              value={locationLabel}
+              hintText="Esim. Helsinki, Kallio"
+              onChangeText={setLocationLabel}
+            />
           </View>
         </ScrollView>
 
