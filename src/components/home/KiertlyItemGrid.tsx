@@ -17,6 +17,7 @@ export type KiertlyGridItem = {
   filterCategories?: HomeCategory[];
   categoryLabel?: string;
   detailDescription?: string;
+  ownerId?: string;
   ownerName?: string;
   isAvailable?: boolean;
 };
