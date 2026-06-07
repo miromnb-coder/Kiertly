@@ -14,7 +14,7 @@ import { KiertlyShareMethodChips, type ShareMethod } from './KiertlyShareMethodC
 
 type KiertlyShareScreenProps = {
   onClose: () => void;
-  onCreateItem: (item: KiertlyGridItem) => void;
+  onCreateItem: (item: KiertlyGridItem) => Promise<void> | void;
 };
 
 const maxPhotos = 10;
@@ -67,6 +67,7 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
   const [selectedCategory, setSelectedCategory] = useState<ShareCategory | undefined>();
   const [selectedPhotos, setSelectedPhotos] = useState<SelectedPhoto[]>([]);
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const shouldShowPrice = selectedMethod === 'Vuokraa' || selectedMethod === 'Myy käytettynä';
 
@@ -113,7 +114,11 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
     setSelectedPhotos((currentPhotos) => currentPhotos.filter((photo) => photo.id !== photoId));
   }
 
-  function submitItem() {
+  async function submitItem() {
+    if (isSubmitting) {
+      return;
+    }
+
     const trimmedTitle = title.trim();
     const trimmedPrice = price.trim();
 
@@ -148,17 +153,25 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
       filterCategories: getFilterCategories(selectedMethod),
       categoryLabel: selectedCategory,
       detailDescription: description.trim(),
-      ownerName: 'Sanni',
+      ownerName: 'Sinä',
       isAvailable: true,
     };
 
-    onCreateItem(newItem);
-    Alert.alert('Tavara lisätty!', 'Tavara lisättiin Kiertlyyn.', [
-      {
-        text: 'OK',
-        onPress: onClose,
-      },
-    ]);
+    setIsSubmitting(true);
+
+    try {
+      await onCreateItem(newItem);
+      Alert.alert('Tavara lisätty!', 'Tavara tallennettiin Kiertlyyn.', [
+        {
+          text: 'OK',
+          onPress: onClose,
+        },
+      ]);
+    } catch {
+      Alert.alert('Tallennus epäonnistui', 'Tavaraa ei voitu tallentaa. Yritä uudelleen.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -217,8 +230,13 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
         </ScrollView>
 
         <View style={styles.footer}>
-          <Pressable accessibilityRole="button" onPress={submitItem} style={styles.submitButton}>
-            <Text style={styles.submitText}>Jaa tavara</Text>
+          <Pressable
+            accessibilityRole="button"
+            disabled={isSubmitting}
+            onPress={submitItem}
+            style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+          >
+            <Text style={styles.submitText}>{isSubmitting ? 'Tallennetaan...' : 'Jaa tavara'}</Text>
           </Pressable>
         </View>
 
@@ -264,6 +282,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: theme.radius.md,
     backgroundColor: theme.colors.primary,
+  },
+  submitButtonDisabled: {
+    opacity: 0.72,
   },
   submitText: {
     color: theme.colors.white,
