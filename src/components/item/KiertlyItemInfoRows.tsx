@@ -13,9 +13,15 @@ type InfoRow = {
 
 type KiertlyItemInfoRowsProps = {
   category: string;
+  availabilityText: string;
+  locationLabel: string;
 };
 
-export function KiertlyItemInfoRows({ category }: KiertlyItemInfoRowsProps) {
+export function KiertlyItemInfoRows({
+  category,
+  availabilityText,
+  locationLabel,
+}: KiertlyItemInfoRowsProps) {
   const rows: InfoRow[] = [
     {
       icon: 'archive',
@@ -26,13 +32,13 @@ export function KiertlyItemInfoRows({ category }: KiertlyItemInfoRowsProps) {
     {
       icon: 'clock',
       label: 'Saatavuus',
-      value: 'Tänään klo 18 jälkeen',
+      value: availabilityText,
       isHighlighted: true,
     },
     {
       icon: 'map-pin',
       label: 'Sijainti',
-      value: 'Helsinki, Kallio • 2,4 km',
+      value: locationLabel,
       showChevron: true,
     },
   ];
