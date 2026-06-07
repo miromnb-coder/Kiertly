@@ -12,7 +12,10 @@ import { KiertlyOwnerCard } from './KiertlyOwnerCard';
 
 type KiertlyItemDetailScreenProps = {
   item: KiertlyGridItem;
+  isSubmittingRequest?: boolean;
   onBack: () => void;
+  onRequestItem: (item: KiertlyGridItem) => void;
+  onChatPress: (item: KiertlyGridItem) => void;
 };
 
 function getPrimaryActionLabel(highlight: string) {
@@ -43,7 +46,13 @@ function getDescription(item: KiertlyGridItem) {
   return 'Hyväkuntoinen tavara lähialueelta. Sopii arjen tarpeisiin ja on noudettavissa joustavasti. Kysy rohkeasti lisätietoja ennen varausta.';
 }
 
-export function KiertlyItemDetailScreen({ item, onBack }: KiertlyItemDetailScreenProps) {
+export function KiertlyItemDetailScreen({
+  item,
+  isSubmittingRequest = false,
+  onBack,
+  onRequestItem,
+  onChatPress,
+}: KiertlyItemDetailScreenProps) {
   const category = item.categoryLabel ?? 'Työkalut';
 
   return (
@@ -84,7 +93,12 @@ export function KiertlyItemDetailScreen({ item, onBack }: KiertlyItemDetailScree
         </View>
       </ScrollView>
 
-      <KiertlyItemActionBar primaryLabel={getPrimaryActionLabel(item.highlight)} />
+      <KiertlyItemActionBar
+        primaryLabel={getPrimaryActionLabel(item.highlight)}
+        isSubmitting={isSubmittingRequest}
+        onChatPress={() => onChatPress(item)}
+        onPrimaryPress={() => onRequestItem(item)}
+      />
     </SafeAreaView>
   );
 }
