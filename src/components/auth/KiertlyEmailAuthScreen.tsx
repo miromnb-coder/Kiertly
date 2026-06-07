@@ -1,12 +1,14 @@
 import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -80,6 +82,7 @@ export function KiertlyEmailAuthScreen({ onBack, onAuthenticated }: KiertlyEmail
   }
 
   function changeAuthMode(nextMode: AuthMode) {
+    Keyboard.dismiss();
     setAuthMode(nextMode);
     setErrorMessage('');
     setSuccessMessage('');
@@ -126,6 +129,7 @@ export function KiertlyEmailAuthScreen({ onBack, onAuthenticated }: KiertlyEmail
       return;
     }
 
+    Keyboard.dismiss();
     clearMessages();
 
     if (!validateForm()) {
@@ -181,176 +185,182 @@ export function KiertlyEmailAuthScreen({ onBack, onAuthenticated }: KiertlyEmail
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardView}
-      >
-        <View style={styles.content}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Takaisin"
-            onPress={onBack}
-            hitSlop={12}
-            style={styles.backButton}
-          >
-            <Feather name="arrow-left" size={29} color={theme.colors.text} strokeWidth={1.8} />
-          </Pressable>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.keyboardView}
+        >
+          <View style={styles.content}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Takaisin"
+              onPress={() => {
+                Keyboard.dismiss();
+                onBack();
+              }}
+              hitSlop={12}
+              style={styles.backButton}
+            >
+              <Feather name="arrow-left" size={29} color={theme.colors.text} strokeWidth={1.8} />
+            </Pressable>
 
-          <View style={styles.brandWrap}>
-            <Text style={styles.smallBrand}>Kiertly</Text>
-          </View>
-
-          <View style={styles.titleWrap}>
-            <Text style={styles.title}>{isSignUp ? 'Luo tili' : 'Kirjaudu sisään'}</Text>
-            <Text style={styles.subtitle}>
-              {isSignUp
-                ? 'Aloita luomalla tili sähköpostilla.'
-                : 'Jatka kirjautumalla sähköpostilla.'}
-            </Text>
-          </View>
-
-          <View style={styles.form}>
-            <View style={styles.inputWrap}>
-              <Feather name="mail" size={22} color={theme.colors.mutedText} strokeWidth={1.8} />
-              <TextInput
-                value={email}
-                onChangeText={(nextEmail) => {
-                  setEmail(nextEmail);
-                  clearMessages();
-                }}
-                placeholder="Sähköposti"
-                placeholderTextColor={theme.colors.mutedText}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                textContentType="emailAddress"
-                editable={!isSubmitting}
-                style={styles.input}
-              />
+            <View style={styles.brandWrap}>
+              <Text style={styles.smallBrand}>Kiertly</Text>
             </View>
 
-            <View style={styles.inputWrap}>
-              <Feather name="lock" size={22} color={theme.colors.mutedText} strokeWidth={1.8} />
-              <TextInput
-                value={password}
-                onChangeText={(nextPassword) => {
-                  setPassword(nextPassword);
-                  clearMessages();
-                }}
-                placeholder="Salasana"
-                placeholderTextColor={theme.colors.mutedText}
-                secureTextEntry={!isPasswordVisible}
-                textContentType="password"
-                editable={!isSubmitting}
-                style={styles.input}
-              />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={isPasswordVisible ? 'Piilota salasana' : 'Näytä salasana'}
-                onPress={() => setIsPasswordVisible((currentValue) => !currentValue)}
-                hitSlop={10}
-              >
-                <Feather
-                  name={isPasswordVisible ? 'eye' : 'eye-off'}
-                  size={22}
-                  color={theme.colors.mutedText}
-                  strokeWidth={1.8}
+            <View style={styles.titleWrap}>
+              <Text style={styles.title}>{isSignUp ? 'Luo tili' : 'Kirjaudu sisään'}</Text>
+              <Text style={styles.subtitle}>
+                {isSignUp
+                  ? 'Aloita luomalla tili sähköpostilla.'
+                  : 'Jatka kirjautumalla sähköpostilla.'}
+              </Text>
+            </View>
+
+            <View style={styles.form}>
+              <View style={styles.inputWrap}>
+                <Feather name="mail" size={22} color={theme.colors.mutedText} strokeWidth={1.8} />
+                <TextInput
+                  value={email}
+                  onChangeText={(nextEmail) => {
+                    setEmail(nextEmail);
+                    clearMessages();
+                  }}
+                  placeholder="Sähköposti"
+                  placeholderTextColor={theme.colors.mutedText}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  textContentType="emailAddress"
+                  editable={!isSubmitting}
+                  style={styles.input}
                 />
-              </Pressable>
-            </View>
+              </View>
 
-            {isSignUp ? (
               <View style={styles.inputWrap}>
                 <Feather name="lock" size={22} color={theme.colors.mutedText} strokeWidth={1.8} />
                 <TextInput
-                  value={confirmPassword}
-                  onChangeText={(nextConfirmPassword) => {
-                    setConfirmPassword(nextConfirmPassword);
+                  value={password}
+                  onChangeText={(nextPassword) => {
+                    setPassword(nextPassword);
                     clearMessages();
                   }}
-                  placeholder="Vahvista salasana"
+                  placeholder="Salasana"
                   placeholderTextColor={theme.colors.mutedText}
-                  secureTextEntry={!isConfirmPasswordVisible}
+                  secureTextEntry={!isPasswordVisible}
                   textContentType="password"
                   editable={!isSubmitting}
                   style={styles.input}
                 />
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={isConfirmPasswordVisible ? 'Piilota salasana' : 'Näytä salasana'}
-                  onPress={() => setIsConfirmPasswordVisible((currentValue) => !currentValue)}
+                  accessibilityLabel={isPasswordVisible ? 'Piilota salasana' : 'Näytä salasana'}
+                  onPress={() => setIsPasswordVisible((currentValue) => !currentValue)}
                   hitSlop={10}
                 >
                   <Feather
-                    name={isConfirmPasswordVisible ? 'eye' : 'eye-off'}
+                    name={isPasswordVisible ? 'eye' : 'eye-off'}
                     size={22}
                     color={theme.colors.mutedText}
                     strokeWidth={1.8}
                   />
                 </Pressable>
               </View>
-            ) : null}
 
-            {isSignUp ? (
-              <Pressable
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: hasAcceptedTerms }}
-                onPress={() => {
-                  setHasAcceptedTerms((currentValue) => !currentValue);
-                  clearMessages();
-                }}
-                style={styles.termsRow}
-              >
-                <View style={[styles.checkbox, hasAcceptedTerms && styles.checkboxChecked]}>
-                  {hasAcceptedTerms ? (
-                    <Feather name="check" size={15} color={theme.colors.white} strokeWidth={2.4} />
-                  ) : null}
+              {isSignUp ? (
+                <View style={styles.inputWrap}>
+                  <Feather name="lock" size={22} color={theme.colors.mutedText} strokeWidth={1.8} />
+                  <TextInput
+                    value={confirmPassword}
+                    onChangeText={(nextConfirmPassword) => {
+                      setConfirmPassword(nextConfirmPassword);
+                      clearMessages();
+                    }}
+                    placeholder="Vahvista salasana"
+                    placeholderTextColor={theme.colors.mutedText}
+                    secureTextEntry={!isConfirmPasswordVisible}
+                    textContentType="password"
+                    editable={!isSubmitting}
+                    style={styles.input}
+                  />
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={isConfirmPasswordVisible ? 'Piilota salasana' : 'Näytä salasana'}
+                    onPress={() => setIsConfirmPasswordVisible((currentValue) => !currentValue)}
+                    hitSlop={10}
+                  >
+                    <Feather
+                      name={isConfirmPasswordVisible ? 'eye' : 'eye-off'}
+                      size={22}
+                      color={theme.colors.mutedText}
+                      strokeWidth={1.8}
+                    />
+                  </Pressable>
                 </View>
-                <Text style={styles.termsText}>
-                  Hyväksyn <Text style={styles.termsLink}>käyttöehdot</Text>
+              ) : null}
+
+              {isSignUp ? (
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: hasAcceptedTerms }}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setHasAcceptedTerms((currentValue) => !currentValue);
+                    clearMessages();
+                  }}
+                  style={styles.termsRow}
+                >
+                  <View style={[styles.checkbox, hasAcceptedTerms && styles.checkboxChecked]}>
+                    {hasAcceptedTerms ? (
+                      <Feather name="check" size={15} color={theme.colors.white} strokeWidth={2.4} />
+                    ) : null}
+                  </View>
+                  <Text style={styles.termsText}>
+                    Hyväksyn <Text style={styles.termsLink}>käyttöehdot</Text>
+                  </Text>
+                </Pressable>
+              ) : null}
+
+              {errorMessage ? (
+                <View style={styles.errorBox}>
+                  <Feather name="alert-circle" size={17} color="#A14C3A" strokeWidth={2} />
+                  <Text style={styles.errorText}>{errorMessage}</Text>
+                </View>
+              ) : null}
+
+              {successMessage ? (
+                <View style={styles.successBox}>
+                  <Feather name="check-circle" size={17} color="#405032" strokeWidth={2} />
+                  <Text style={styles.successText}>{successMessage}</Text>
+                </View>
+              ) : null}
+
+              <Pressable
+                accessibilityRole="button"
+                onPress={validateAndContinue}
+                disabled={isSubmitting}
+                style={[styles.continueButton, isSubmitting && styles.continueButtonDisabled]}
+              >
+                <Text style={styles.continueText}>
+                  {isSubmitting ? 'Hetki...' : isSignUp ? 'Jatka' : 'Kirjaudu'}
                 </Text>
               </Pressable>
-            ) : null}
 
-            {errorMessage ? (
-              <View style={styles.errorBox}>
-                <Feather name="alert-circle" size={17} color="#A14C3A" strokeWidth={2} />
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              </View>
-            ) : null}
-
-            {successMessage ? (
-              <View style={styles.successBox}>
-                <Feather name="check-circle" size={17} color="#405032" strokeWidth={2} />
-                <Text style={styles.successText}>{successMessage}</Text>
-              </View>
-            ) : null}
-
-            <Pressable
-              accessibilityRole="button"
-              onPress={validateAndContinue}
-              disabled={isSubmitting}
-              style={[styles.continueButton, isSubmitting && styles.continueButtonDisabled]}
-            >
-              <Text style={styles.continueText}>
-                {isSubmitting ? 'Hetki...' : isSignUp ? 'Jatka' : 'Kirjaudu'}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => changeAuthMode(isSignUp ? 'signIn' : 'signUp')}
-              disabled={isSubmitting}
-              hitSlop={12}
-              style={styles.loginLinkWrap}
-            >
-              <Text style={styles.loginText}>
-                {isSignUp ? 'Onko sinulla jo tili? ' : 'Ei vielä tiliä? '}
-                <Text style={styles.loginLink}>{isSignUp ? 'Kirjaudu' : 'Luo tili'}</Text>
-              </Text>
-            </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => changeAuthMode(isSignUp ? 'signIn' : 'signUp')}
+                disabled={isSubmitting}
+                hitSlop={12}
+                style={styles.loginLinkWrap}
+              >
+                <Text style={styles.loginText}>
+                  {isSignUp ? 'Onko sinulla jo tili? ' : 'Ei vielä tiliä? '}
+                  <Text style={styles.loginLink}>{isSignUp ? 'Kirjaudu' : 'Luo tili'}</Text>
+                </Text>
+              </Pressable>
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }
