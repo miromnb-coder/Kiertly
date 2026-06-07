@@ -6,9 +6,14 @@ import { theme } from '../../constants/theme';
 type KiertlyItemHeroImageProps = {
   imageUri?: string;
   backgroundColor: string;
+  imageCount?: number;
 };
 
-export function KiertlyItemHeroImage({ imageUri, backgroundColor }: KiertlyItemHeroImageProps) {
+export function KiertlyItemHeroImage({
+  imageUri,
+  backgroundColor,
+  imageCount = imageUri ? 1 : 0,
+}: KiertlyItemHeroImageProps) {
   return (
     <View style={[styles.hero, { backgroundColor }]}> 
       {imageUri ? (
@@ -19,9 +24,11 @@ export function KiertlyItemHeroImage({ imageUri, backgroundColor }: KiertlyItemH
         </View>
       )}
 
-      <View style={styles.counterPill}>
-        <Text style={styles.counterText}>1/5</Text>
-      </View>
+      {imageCount > 0 ? (
+        <View style={styles.counterPill}>
+          <Text style={styles.counterText}>1/{imageCount}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
