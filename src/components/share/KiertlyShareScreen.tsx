@@ -121,6 +121,7 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
 
     const trimmedTitle = title.trim();
     const trimmedPrice = price.trim();
+    const selectedPhotoUris = selectedPhotos.map((photo) => photo.uri);
 
     if (selectedPhotos.length === 0) {
       Alert.alert('Lisää kuva', 'Lisää tavarasta ainakin yksi kuva.');
@@ -149,7 +150,9 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
       highlight: getHighlight(selectedMethod, trimmedPrice),
       likes: 0,
       backgroundColor: '#EFE5D6',
-      imageUri: selectedPhotos[0].uri,
+      imageUri: selectedPhotoUris[0],
+      imageUris: selectedPhotoUris,
+      imagePaths: [],
       filterCategories: getFilterCategories(selectedMethod),
       categoryLabel: selectedCategory,
       detailDescription: description.trim(),
