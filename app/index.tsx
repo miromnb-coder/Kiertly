@@ -50,6 +50,7 @@ export default function HomeScreen() {
   const [editingItem, setEditingItem] = useState<KiertlyGridItem | undefined>();
 
   const searchableItems = [...sharedItems, ...kiertlyDefaultItems];
+  const userEmail = session?.user.email ?? null;
 
   useEffect(() => {
     let isMounted = true;
@@ -75,6 +76,24 @@ export default function HomeScreen() {
       subscription.unsubscribe();
     };
   }, []);
+
+  function resetNavigationState() {
+    setActiveTab('home');
+    setIsSearchOpen(false);
+    setSearchQuery('');
+    setActiveSearchTab('products');
+    setActiveCategory('Kaikki');
+    setSelectedItem(undefined);
+    setSelectedThread(undefined);
+    setEditingItem(undefined);
+    setProfileSubscreen('main');
+  }
+
+  async function signOut() {
+    resetNavigationState();
+    setAuthScreen('start');
+    await supabase.auth.signOut();
+  }
 
   function closeSearch() {
     setIsSearchOpen(false);
@@ -185,7 +204,9 @@ export default function HomeScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.pageContent}>
           <KiertlyProfileScreen
             sharedItemCount={sharedItems.length}
+            userEmail={userEmail}
             onOwnItemsPress={() => setProfileSubscreen('ownItems')}
+            onSignOut={signOut}
           />
         </ScrollView>
       );
