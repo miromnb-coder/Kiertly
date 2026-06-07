@@ -13,6 +13,20 @@ type KiertlyOwnItemsScreenProps = {
   onToggleAvailability: (item: KiertlyGridItem) => void;
 };
 
+function getDisplayMeta(item: KiertlyGridItem) {
+  if (!item.locationLabel) {
+    return item.meta;
+  }
+
+  const methodText = item.meta.split('•')[0]?.trim();
+
+  if (methodText) {
+    return `${methodText} • ${item.locationLabel}`;
+  }
+
+  return item.locationLabel;
+}
+
 export function KiertlyOwnItemsScreen({
   items,
   onBack,
@@ -84,7 +98,7 @@ export function KiertlyOwnItemsScreen({
 
                     <View style={styles.cardTextWrap}>
                       <Text numberOfLines={1} style={styles.itemTitle}>{item.title}</Text>
-                      <Text numberOfLines={1} style={styles.itemMeta}>{item.meta}</Text>
+                      <Text numberOfLines={1} style={styles.itemMeta}>{getDisplayMeta(item)}</Text>
                       <Text numberOfLines={1} style={styles.itemHighlight}>{item.highlight}</Text>
                       <View style={[styles.statusPill, isAvailable ? styles.availablePill : styles.unavailablePill]}>
                         <View style={[styles.statusDot, isAvailable ? styles.availableDot : styles.unavailableDot]} />
