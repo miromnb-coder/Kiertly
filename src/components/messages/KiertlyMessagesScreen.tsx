@@ -3,16 +3,26 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
 
-type MessageThread = {
+export type MessageThread = {
   id: string;
   name: string;
   itemTitle: string;
   preview: string;
   time: string;
   avatarUri: string;
+  itemImageUri?: string;
+  itemHighlight: string;
+  distance: string;
   isOnline?: boolean;
   unreadCount?: number;
 };
+
+type KiertlyMessagesScreenProps = {
+  onThreadPress: (thread: MessageThread) => void;
+};
+
+const categoryImageBaseUrl =
+  'https://raw.githubusercontent.com/miromnb-coder/Kiertly/main/assets/categories';
 
 const messageThreads: MessageThread[] = [
   {
@@ -22,6 +32,9 @@ const messageThreads: MessageThread[] = [
     preview: 'Hei! Onko porakone vielä saatavilla ensi viikolla?',
     time: '10.24',
     avatarUri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&crop=faces',
+    itemImageUri: `${categoryImageBaseUrl}/tools.PNG`,
+    itemHighlight: 'Lainaa ilmaiseksi',
+    distance: '2,4 km',
     isOnline: true,
     unreadCount: 1,
   },
@@ -32,6 +45,9 @@ const messageThreads: MessageThread[] = [
     preview: 'Kiitos! Nouto sopii minulle torstaina iltapäivällä.',
     time: '09.48',
     avatarUri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&crop=faces',
+    itemImageUri: `${categoryImageBaseUrl}/travel.PNG`,
+    itemHighlight: '4 € / päivä',
+    distance: '3,1 km',
     isOnline: true,
   },
   {
@@ -41,6 +57,9 @@ const messageThreads: MessageThread[] = [
     preview: 'Kaiutin toimi tosi hyvin, kiitos lainasta! ⭐',
     time: 'Eilen',
     avatarUri: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&h=160&fit=crop&crop=faces',
+    itemImageUri: `${categoryImageBaseUrl}/electronics.PNG`,
+    itemHighlight: '2 € / päivä',
+    distance: '0,8 km',
     isOnline: true,
   },
   {
@@ -50,6 +69,9 @@ const messageThreads: MessageThread[] = [
     preview: 'Sovitaan kohtaamispaikka huomiselle.',
     time: 'Pe',
     avatarUri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=faces',
+    itemImageUri: `${categoryImageBaseUrl}/camping.PNG`,
+    itemHighlight: 'Vaihda',
+    distance: '1,7 km',
   },
   {
     id: 'sofia-party',
@@ -58,10 +80,13 @@ const messageThreads: MessageThread[] = [
     preview: 'Moi! Laitoin vielä viestin yksityiskohdista 😊',
     time: 'Pe',
     avatarUri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=faces',
+    itemImageUri: `${categoryImageBaseUrl}/party.PNG`,
+    itemHighlight: 'Vaihda',
+    distance: '1,2 km',
   },
 ];
 
-export function KiertlyMessagesScreen() {
+export function KiertlyMessagesScreen({ onThreadPress }: KiertlyMessagesScreenProps) {
   return (
     <View style={styles.screenContent}>
       <View style={styles.header}>
@@ -78,7 +103,12 @@ export function KiertlyMessagesScreen() {
 
       <View style={styles.threadList}>
         {messageThreads.map((thread) => (
-          <Pressable key={thread.id} accessibilityRole="button" style={styles.threadRow}>
+          <Pressable
+            key={thread.id}
+            accessibilityRole="button"
+            onPress={() => onThreadPress(thread)}
+            style={styles.threadRow}
+          >
             <View style={styles.avatarWrap}>
               <Image source={{ uri: thread.avatarUri }} style={styles.avatar} />
               {thread.isOnline ? <View style={styles.onlineDot} /> : null}
