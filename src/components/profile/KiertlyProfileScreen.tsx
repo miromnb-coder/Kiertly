@@ -1,57 +1,14 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
 
-type ProfileStat = {
-  icon: keyof typeof Feather.glyphMap;
-  value: string;
-  label: string;
+type KiertlyProfileScreenProps = {
+  sharedItemCount: number;
+  onOwnItemsPress: () => void;
 };
 
-type ProfileMenuItem = {
-  icon: keyof typeof Feather.glyphMap;
-  title: string;
-  subtitle: string;
-};
-
-const stats: ProfileStat[] = [
-  { icon: 'package', value: '23', label: 'Jaettua tavaraa' },
-  { icon: 'refresh-cw', value: '48', label: 'Onnistunutta\nlainaa' },
-  { icon: 'heart', value: '12', label: 'Tallennettua' },
-];
-
-const firstMenuGroup: ProfileMenuItem[] = [
-  { icon: 'box', title: 'Omat tavarat', subtitle: 'Näytä ja hallinnoi' },
-  { icon: 'bookmark', title: 'Tallennetut', subtitle: 'Tallentamasi tavarat ja haut' },
-  { icon: 'star', title: 'Arvostelut', subtitle: 'Saatu palaute ja antamasi arviot' },
-];
-
-const secondMenuGroup: ProfileMenuItem[] = [
-  { icon: 'settings', title: 'Asetukset', subtitle: 'Ilmoitukset, tili ja yksityisyys' },
-  { icon: 'help-circle', title: 'Apua', subtitle: 'Usein kysytyt kysymykset ja tuki' },
-];
-
-function ProfileMenuGroup({ items }: { items: ProfileMenuItem[] }) {
-  return (
-    <View style={styles.menuGroup}>
-      {items.map((item, index) => (
-        <Pressable key={item.title} accessibilityRole="button" style={[styles.menuRow, index > 0 && styles.menuRowBorder]}>
-          <View style={styles.menuIconWrap}>
-            <Feather name={item.icon} size={23} color={theme.colors.primary} strokeWidth={1.9} />
-          </View>
-          <View style={styles.menuTextWrap}>
-            <Text style={styles.menuTitle}>{item.title}</Text>
-            <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
-          </View>
-          <Feather name="chevron-right" size={22} color={theme.colors.text} strokeWidth={1.9} />
-        </Pressable>
-      ))}
-    </View>
-  );
-}
-
-export function KiertlyProfileScreen() {
+export function KiertlyProfileScreen({ sharedItemCount, onOwnItemsPress }: KiertlyProfileScreenProps) {
   return (
     <View style={styles.screenContent}>
       <View style={styles.topBar}>
@@ -62,32 +19,89 @@ export function KiertlyProfileScreen() {
       </View>
 
       <View style={styles.profileHeader}>
-        <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=220&h=220&fit=crop&crop=faces' }}
-          style={styles.avatar}
-        />
+        <View style={styles.avatar}>
+          <Feather name="user" size={52} color={theme.colors.primary} strokeWidth={1.8} />
+        </View>
         <View style={styles.profileTextWrap}>
           <Text style={styles.name}>Sanni</Text>
-          <View style={styles.userTypeRow}>
-            <Text style={styles.leaf}>🌿</Text>
-            <Text style={styles.userType}>Kiertly-käyttäjä</Text>
-          </View>
+          <Text style={styles.userType}>Kiertly-käyttäjä</Text>
           <Text style={styles.bio}>Teen arjesta kestävämpää jakamalla ja lainaamalla.</Text>
         </View>
       </View>
 
       <View style={styles.statsCard}>
-        {stats.map((stat, index) => (
-          <View key={stat.label} style={[styles.statItem, index > 0 && styles.statBorder]}>
-            <Feather name={stat.icon} size={23} color={theme.colors.primary} strokeWidth={1.8} />
-            <Text style={styles.statValue}>{stat.value}</Text>
-            <Text style={styles.statLabel}>{stat.label}</Text>
-          </View>
-        ))}
+        <View style={styles.statItem}>
+          <Feather name="package" size={23} color={theme.colors.primary} strokeWidth={1.8} />
+          <Text style={styles.statValue}>{sharedItemCount}</Text>
+          <Text style={styles.statLabel}>Jaettua tavaraa</Text>
+        </View>
+        <View style={[styles.statItem, styles.statBorder]}>
+          <Feather name="refresh-cw" size={23} color={theme.colors.primary} strokeWidth={1.8} />
+          <Text style={styles.statValue}>48</Text>
+          <Text style={styles.statLabel}>Onnistunutta lainaa</Text>
+        </View>
+        <View style={[styles.statItem, styles.statBorder]}>
+          <Feather name="heart" size={23} color={theme.colors.primary} strokeWidth={1.8} />
+          <Text style={styles.statValue}>12</Text>
+          <Text style={styles.statLabel}>Tallennettua</Text>
+        </View>
       </View>
 
-      <ProfileMenuGroup items={firstMenuGroup} />
-      <ProfileMenuGroup items={secondMenuGroup} />
+      <View style={styles.menuGroup}>
+        <Pressable accessibilityRole="button" onPress={onOwnItemsPress} style={styles.menuRow}>
+          <View style={styles.menuIconWrap}>
+            <Feather name="box" size={23} color={theme.colors.primary} strokeWidth={1.9} />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={styles.menuTitle}>Omat tavarat</Text>
+            <Text style={styles.menuSubtitle}>Näytä ja hallinnoi</Text>
+          </View>
+          <Feather name="chevron-right" size={22} color={theme.colors.text} strokeWidth={1.9} />
+        </Pressable>
+        <View style={[styles.menuRow, styles.menuRowBorder]}>
+          <View style={styles.menuIconWrap}>
+            <Feather name="bookmark" size={23} color={theme.colors.primary} strokeWidth={1.9} />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={styles.menuTitle}>Tallennetut</Text>
+            <Text style={styles.menuSubtitle}>Tallentamasi tavarat ja haut</Text>
+          </View>
+          <Feather name="chevron-right" size={22} color={theme.colors.text} strokeWidth={1.9} />
+        </View>
+        <View style={[styles.menuRow, styles.menuRowBorder]}>
+          <View style={styles.menuIconWrap}>
+            <Feather name="star" size={23} color={theme.colors.primary} strokeWidth={1.9} />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={styles.menuTitle}>Arvostelut</Text>
+            <Text style={styles.menuSubtitle}>Palaute ja arviot</Text>
+          </View>
+          <Feather name="chevron-right" size={22} color={theme.colors.text} strokeWidth={1.9} />
+        </View>
+      </View>
+
+      <View style={styles.menuGroup}>
+        <View style={styles.menuRow}>
+          <View style={styles.menuIconWrap}>
+            <Feather name="settings" size={23} color={theme.colors.primary} strokeWidth={1.9} />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={styles.menuTitle}>Asetukset</Text>
+            <Text style={styles.menuSubtitle}>Ilmoitukset ja tili</Text>
+          </View>
+          <Feather name="chevron-right" size={22} color={theme.colors.text} strokeWidth={1.9} />
+        </View>
+        <View style={[styles.menuRow, styles.menuRowBorder]}>
+          <View style={styles.menuIconWrap}>
+            <Feather name="help-circle" size={23} color={theme.colors.primary} strokeWidth={1.9} />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={styles.menuTitle}>Apua</Text>
+            <Text style={styles.menuSubtitle}>Usein kysytyt kysymykset ja tuki</Text>
+          </View>
+          <Feather name="chevron-right" size={22} color={theme.colors.text} strokeWidth={1.9} />
+        </View>
+      </View>
     </View>
   );
 }
@@ -121,8 +135,10 @@ const styles = StyleSheet.create({
   avatar: {
     width: 118,
     height: 118,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.border,
+    backgroundColor: '#EEF3E4',
   },
   profileTextWrap: {
     flex: 1,
@@ -134,16 +150,8 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -0.4,
   },
-  userTypeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: theme.spacing.sm,
-  },
-  leaf: {
-    fontSize: 19,
-  },
   userType: {
+    marginTop: theme.spacing.sm,
     color: theme.colors.mutedText,
     fontSize: 15,
     fontWeight: '700',
