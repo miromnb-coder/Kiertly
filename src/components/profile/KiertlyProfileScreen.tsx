@@ -5,10 +5,20 @@ import { theme } from '../../constants/theme';
 
 type KiertlyProfileScreenProps = {
   sharedItemCount: number;
+  userEmail?: string | null;
   onOwnItemsPress: () => void;
+  onSignOut: () => void;
 };
 
-export function KiertlyProfileScreen({ sharedItemCount, onOwnItemsPress }: KiertlyProfileScreenProps) {
+export function KiertlyProfileScreen({
+  sharedItemCount,
+  userEmail,
+  onOwnItemsPress,
+  onSignOut,
+}: KiertlyProfileScreenProps) {
+  const displayEmail = userEmail ?? 'Ei sähköpostia';
+  const displayName = userEmail ? userEmail.split('@')[0] : 'Kiertly-käyttäjä';
+
   return (
     <View style={styles.screenContent}>
       <View style={styles.topBar}>
@@ -23,8 +33,8 @@ export function KiertlyProfileScreen({ sharedItemCount, onOwnItemsPress }: Kiert
           <Feather name="user" size={52} color={theme.colors.primary} strokeWidth={1.8} />
         </View>
         <View style={styles.profileTextWrap}>
-          <Text style={styles.name}>Sanni</Text>
-          <Text style={styles.userType}>Kiertly-käyttäjä</Text>
+          <Text style={styles.name} numberOfLines={1}>{displayName}</Text>
+          <Text style={styles.userType} numberOfLines={1}>{displayEmail}</Text>
           <Text style={styles.bio}>Teen arjesta kestävämpää jakamalla ja lainaamalla.</Text>
         </View>
       </View>
@@ -101,6 +111,16 @@ export function KiertlyProfileScreen({ sharedItemCount, onOwnItemsPress }: Kiert
           </View>
           <Feather name="chevron-right" size={22} color={theme.colors.text} strokeWidth={1.9} />
         </View>
+        <Pressable accessibilityRole="button" onPress={onSignOut} style={[styles.menuRow, styles.menuRowBorder]}>
+          <View style={styles.menuIconWrap}>
+            <Feather name="log-out" size={23} color="#A14C3A" strokeWidth={1.9} />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={styles.logoutTitle}>Kirjaudu ulos</Text>
+            <Text style={styles.menuSubtitle}>Palaa aloitusnäkymään</Text>
+          </View>
+          <Feather name="chevron-right" size={22} color={theme.colors.text} strokeWidth={1.9} />
+        </Pressable>
       </View>
     </View>
   );
@@ -226,6 +246,11 @@ const styles = StyleSheet.create({
   },
   menuTitle: {
     color: theme.colors.text,
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  logoutTitle: {
+    color: '#A14C3A',
     fontSize: 15,
     fontWeight: '800',
   },
