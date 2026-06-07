@@ -5,6 +5,7 @@ import { theme } from '../../constants/theme';
 
 export type MessageThread = {
   id: string;
+  itemId?: string;
   name: string;
   itemTitle: string;
   preview: string;
