@@ -8,6 +8,12 @@
       "problemMatcher": []
     },
     {
+      "label": "Kiertly: install Expo tunnel",
+      "type": "shell",
+      "command": "npm install @expo/ngrok@^4.1.0",
+      "problemMatcher": []
+    },
+    {
       "label": "Kiertly: open in Expo Go",
       "type": "npm",
       "script": "start:expo-go",
