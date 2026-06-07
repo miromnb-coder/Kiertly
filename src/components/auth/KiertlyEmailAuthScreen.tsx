@@ -54,7 +54,7 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
 
           <View style={styles.form}>
             <View style={styles.inputWrap}>
-              <Feather name="mail" size={24} color={theme.colors.mutedText} strokeWidth={1.8} />
+              <Feather name="mail" size={22} color={theme.colors.mutedText} strokeWidth={1.8} />
               <TextInput
                 value={email}
                 onChangeText={setEmail}
@@ -68,7 +68,7 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
             </View>
 
             <View style={styles.inputWrap}>
-              <Feather name="lock" size={24} color={theme.colors.mutedText} strokeWidth={1.8} />
+              <Feather name="lock" size={22} color={theme.colors.mutedText} strokeWidth={1.8} />
               <TextInput
                 value={password}
                 onChangeText={setPassword}
@@ -86,7 +86,7 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
               >
                 <Feather
                   name={isPasswordVisible ? 'eye' : 'eye-off'}
-                  size={23}
+                  size={22}
                   color={theme.colors.mutedText}
                   strokeWidth={1.8}
                 />
@@ -94,7 +94,7 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
             </View>
 
             <View style={styles.inputWrap}>
-              <Feather name="lock" size={24} color={theme.colors.mutedText} strokeWidth={1.8} />
+              <Feather name="lock" size={22} color={theme.colors.mutedText} strokeWidth={1.8} />
               <TextInput
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -112,7 +112,7 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
               >
                 <Feather
                   name={isConfirmPasswordVisible ? 'eye' : 'eye-off'}
-                  size={23}
+                  size={22}
                   color={theme.colors.mutedText}
                   strokeWidth={1.8}
                 />
@@ -127,7 +127,7 @@ export function KiertlyEmailAuthScreen({ onBack, onContinue }: KiertlyEmailAuthS
             >
               <View style={[styles.checkbox, hasAcceptedTerms && styles.checkboxChecked]}>
                 {hasAcceptedTerms ? (
-                  <Feather name="check" size={17} color={theme.colors.white} strokeWidth={2.4} />
+                  <Feather name="check" size={15} color={theme.colors.white} strokeWidth={2.4} />
                 ) : null}
               </View>
               <Text style={styles.termsText}>
@@ -162,42 +162,43 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 34,
-    paddingTop: 28,
-    paddingBottom: 56,
+    paddingTop: 14,
+    paddingBottom: 22,
   },
   backButton: {
     width: 44,
-    height: 44,
+    height: 38,
     alignItems: 'flex-start',
     justifyContent: 'center',
   },
   brandWrap: {
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 4,
   },
   smallBrand: {
     color: '#405032',
     fontFamily: 'Georgia',
-    fontSize: 26,
+    fontSize: 25,
     fontWeight: '600',
   },
   titleWrap: {
-    marginTop: 94,
-    marginBottom: 54,
+    marginTop: 52,
+    marginBottom: 34,
   },
   title: {
     color: '#405032',
     fontFamily: 'Georgia',
-    fontSize: 42,
+    fontSize: 39,
     fontWeight: '600',
     letterSpacing: -0.7,
+    lineHeight: 44,
     textAlign: 'center',
   },
   subtitle: {
-    marginTop: 20,
+    marginTop: 14,
     color: theme.colors.mutedText,
-    fontSize: 17,
-    lineHeight: 24,
+    fontSize: 16,
+    lineHeight: 22,
     textAlign: 'center',
     fontWeight: '500',
   },
@@ -205,12 +206,12 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   inputWrap: {
-    height: 68,
+    height: 58,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 18,
-    marginBottom: 24,
-    paddingHorizontal: 24,
+    gap: 16,
+    marginBottom: 16,
+    paddingHorizontal: 22,
     borderWidth: 1.2,
     borderColor: '#6D775E',
     borderRadius: 15,
@@ -220,19 +221,19 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     color: theme.colors.text,
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: '500',
   },
   termsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 13,
+    gap: 12,
     marginTop: 6,
-    marginBottom: 44,
+    marginBottom: 26,
   },
   checkbox: {
-    width: 27,
-    height: 27,
+    width: 25,
+    height: 25,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.7,
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
   },
   termsText: {
     color: theme.colors.mutedText,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
   },
   termsLink: {
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   continueButton: {
-    height: 66,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 15,
@@ -261,16 +262,16 @@ const styles = StyleSheet.create({
   },
   continueText: {
     color: theme.colors.white,
-    fontSize: 21,
+    fontSize: 20,
     fontWeight: '700',
   },
   loginLinkWrap: {
     alignItems: 'center',
-    marginTop: 36,
+    marginTop: 22,
   },
   loginText: {
     color: theme.colors.mutedText,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '500',
   },
   loginLink: {
