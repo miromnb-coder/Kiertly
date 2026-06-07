@@ -15,6 +15,7 @@ export function KiertlyEditItemScreen({ item, onBack, onSave }: KiertlyEditItemS
   const [title, setTitle] = useState(item.title);
   const [description, setDescription] = useState(item.detailDescription ?? '');
   const [highlight, setHighlight] = useState(item.highlight);
+  const [locationLabel, setLocationLabel] = useState(item.locationLabel ?? '');
   const [isSaving, setIsSaving] = useState(false);
 
   async function saveChanges() {
@@ -24,6 +25,7 @@ export function KiertlyEditItemScreen({ item, onBack, onSave }: KiertlyEditItemS
 
     const trimmedTitle = title.trim();
     const trimmedHighlight = highlight.trim();
+    const trimmedLocation = locationLabel.trim();
 
     if (!trimmedTitle) {
       Alert.alert('Lisää otsikko', 'Tavaralla täytyy olla otsikko.');
@@ -35,13 +37,20 @@ export function KiertlyEditItemScreen({ item, onBack, onSave }: KiertlyEditItemS
       return;
     }
 
+    if (!trimmedLocation) {
+      Alert.alert('Lisää sijainti', 'Kirjoita tavaralle alue, esimerkiksi Helsinki, Kallio.');
+      return;
+    }
+
     setIsSaving(true);
 
     try {
       await onSave({
         ...item,
         title: trimmedTitle,
+        meta: `${item.meta.split('•')[0]?.trim() || 'Lainaa'} • ${trimmedLocation}`,
         highlight: trimmedHighlight,
+        locationLabel: trimmedLocation,
         detailDescription: description.trim(),
       });
     } catch {
@@ -105,6 +114,18 @@ export function KiertlyEditItemScreen({ item, onBack, onSave }: KiertlyEditItemS
             value={highlight}
             onChangeText={setHighlight}
             placeholder="Lainaa ilmaiseksi"
+            placeholderTextColor={theme.colors.mutedText}
+            editable={!isSaving}
+            style={styles.input}
+          />
+        </View>
+
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>Sijainti</Text>
+          <TextInput
+            value={locationLabel}
+            onChangeText={setLocationLabel}
+            placeholder="Esim. Helsinki, Kallio"
             placeholderTextColor={theme.colors.mutedText}
             editable={!isSaving}
             style={styles.input}
