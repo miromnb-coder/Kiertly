@@ -146,6 +146,10 @@ export function KiertlyShareScreen({ onClose, onCreateItem }: KiertlyShareScreen
       backgroundColor: '#EFE5D6',
       imageUri: selectedPhotos[0].uri,
       filterCategories: getFilterCategories(selectedMethod),
+      categoryLabel: selectedCategory,
+      detailDescription: description.trim(),
+      ownerName: 'Sanni',
+      isAvailable: true,
     };
 
     onCreateItem(newItem);
