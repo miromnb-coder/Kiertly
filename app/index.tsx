@@ -13,10 +13,15 @@ import {
   type HomeCategory,
 } from '../src/components/home/KiertlyCategoryChips';
 import {
+  KiertlyHomeViewToggle,
+  type HomeViewMode,
+} from '../src/components/home/KiertlyHomeViewToggle';
+import {
   KiertlyItemGrid,
   kiertlyDefaultItems,
   type KiertlyGridItem,
 } from '../src/components/home/KiertlyItemGrid';
+import { KiertlyMapPreview } from '../src/components/home/KiertlyMapPreview';
 import { KiertlyItemDetailScreen } from '../src/components/item/KiertlyItemDetailScreen';
 import { KiertlyChatScreen } from '../src/components/messages/KiertlyChatScreen';
 import { KiertlyMessagesScreen, type MessageThread } from '../src/components/messages/KiertlyMessagesScreen';
@@ -63,6 +68,7 @@ export default function HomeScreen() {
   const [activeSearchTab, setActiveSearchTab] = useState<KiertlySearchMode>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<HomeCategory>('Kaikki');
+  const [homeViewMode, setHomeViewMode] = useState<HomeViewMode>('grid');
   const [ownItems, setOwnItems] = useState<KiertlyGridItem[]>([]);
   const [publicItems, setPublicItems] = useState<KiertlyGridItem[]>([]);
   const [messageThreads, setMessageThreads] = useState<MessageThread[]>([]);
@@ -148,6 +154,7 @@ export default function HomeScreen() {
     setSearchQuery('');
     setActiveSearchTab('products');
     setActiveCategory('Kaikki');
+    setHomeViewMode('grid');
     setSelectedItem(undefined);
     setSelectedThread(undefined);
     setEditingItem(undefined);
@@ -467,11 +474,20 @@ export default function HomeScreen() {
           activeCategory={activeCategory}
           onCategoryPress={setActiveCategory}
         />
-        <KiertlyItemGrid
-          activeCategory={activeCategory}
-          sharedItems={publicItems}
-          onItemPress={setSelectedItem}
-        />
+        <KiertlyHomeViewToggle mode={homeViewMode} onModeChange={setHomeViewMode} />
+        {homeViewMode === 'map' ? (
+          <KiertlyMapPreview
+            activeCategory={activeCategory}
+            sharedItems={publicItems}
+            onItemPress={setSelectedItem}
+          />
+        ) : (
+          <KiertlyItemGrid
+            activeCategory={activeCategory}
+            sharedItems={publicItems}
+            onItemPress={setSelectedItem}
+          />
+        )}
       </ScrollView>
     );
   }
