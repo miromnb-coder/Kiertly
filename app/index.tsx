@@ -9,7 +9,11 @@ import {
   KiertlyCategoryChips,
   type HomeCategory,
 } from '../src/components/home/KiertlyCategoryChips';
-import { KiertlyItemGrid, type KiertlyGridItem } from '../src/components/home/KiertlyItemGrid';
+import {
+  KiertlyItemGrid,
+  kiertlyDefaultItems,
+  type KiertlyGridItem,
+} from '../src/components/home/KiertlyItemGrid';
 import { KiertlyItemDetailScreen } from '../src/components/item/KiertlyItemDetailScreen';
 import { KiertlyChatScreen } from '../src/components/messages/KiertlyChatScreen';
 import { KiertlyMessagesScreen, type MessageThread } from '../src/components/messages/KiertlyMessagesScreen';
@@ -17,8 +21,8 @@ import { KiertlyEditItemScreen } from '../src/components/profile/KiertlyEditItem
 import { KiertlyOwnItemsScreen } from '../src/components/profile/KiertlyOwnItemsScreen';
 import { KiertlyProfileScreen } from '../src/components/profile/KiertlyProfileScreen';
 import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
-import { KiertlySearchEmptyState } from '../src/components/search/KiertlySearchEmptyState';
 import { KiertlySearchHeader, type KiertlySearchMode } from '../src/components/search/KiertlySearchHeader';
+import { KiertlySearchResults } from '../src/components/search/KiertlySearchResults';
 import { KiertlySearchTabs } from '../src/components/search/KiertlySearchTabs';
 import { KiertlyShareScreen } from '../src/components/share/KiertlyShareScreen';
 import { theme } from '../src/constants/theme';
@@ -37,10 +41,17 @@ export default function HomeScreen() {
   const [profileSubscreen, setProfileSubscreen] = useState<ProfileSubscreen>('main');
   const [editingItem, setEditingItem] = useState<KiertlyGridItem | undefined>();
 
+  const searchableItems = [...sharedItems, ...kiertlyDefaultItems];
+
   function closeSearch() {
     setIsSearchOpen(false);
     setSearchQuery('');
     setActiveSearchTab('products');
+  }
+
+  function openSearchItem(item: KiertlyGridItem) {
+    setSelectedItem(item);
+    setIsSearchOpen(false);
   }
 
   function openHomeCategory(category: HomeCategory) {
@@ -195,7 +206,12 @@ export default function HomeScreen() {
             onClose={closeSearch}
           />
           <KiertlySearchTabs activeTab={activeSearchTab} onTabChange={setActiveSearchTab} />
-          <KiertlySearchEmptyState mode={activeSearchTab} />
+          <KiertlySearchResults
+            mode={activeSearchTab}
+            query={searchQuery}
+            items={searchableItems}
+            onItemPress={openSearchItem}
+          />
         </KeyboardAvoidingView>
       ) : (
         <>
