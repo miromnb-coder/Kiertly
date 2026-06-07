@@ -8,6 +8,7 @@ type KiertlyProfileScreenProps = {
   sharedItemCount: number;
   profile?: KiertlyProfile | null;
   userEmail?: string | null;
+  onEditProfilePress: () => void;
   onOwnItemsPress: () => void;
   onSignOut: () => void;
 };
@@ -16,20 +17,32 @@ export function KiertlyProfileScreen({
   sharedItemCount,
   profile,
   userEmail,
+  onEditProfilePress,
   onOwnItemsPress,
   onSignOut,
 }: KiertlyProfileScreenProps) {
   const displayEmail = profile?.email || userEmail || 'Ei sähköpostia';
   const displayName = profile?.displayName || displayEmail.split('@')[0] || 'Kiertly-käyttäjä';
   const displayLocation = profile?.location || 'Sijainti lisäämättä';
+  const displayBio = profile?.bio || 'Teen arjesta kestävämpää jakamalla ja lainaamalla.';
 
   return (
     <View style={styles.screenContent}>
       <View style={styles.topBar}>
         <View />
-        <Pressable accessibilityRole="button" accessibilityLabel="Ilmoitukset" style={styles.notificationButton}>
-          <Feather name="bell" size={23} color={theme.colors.primary} strokeWidth={2} />
-        </Pressable>
+        <View style={styles.topActions}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Muokkaa profiilia"
+            onPress={onEditProfilePress}
+            style={styles.topIconButton}
+          >
+            <Feather name="edit-3" size={22} color={theme.colors.primary} strokeWidth={2} />
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Ilmoitukset" style={styles.topIconButton}>
+            <Feather name="bell" size={23} color={theme.colors.primary} strokeWidth={2} />
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.profileHeader}>
@@ -47,9 +60,18 @@ export function KiertlyProfileScreen({
             <Feather name="map-pin" size={13} color={theme.colors.mutedText} strokeWidth={2} />
             <Text style={styles.locationText} numberOfLines={1}>{displayLocation}</Text>
           </View>
-          <Text style={styles.bio}>Teen arjesta kestävämpää jakamalla ja lainaamalla.</Text>
+          <Text style={styles.bio}>{displayBio}</Text>
         </View>
       </View>
+
+      <Pressable
+        accessibilityRole="button"
+        onPress={onEditProfilePress}
+        style={styles.editProfileButton}
+      >
+        <Feather name="edit-3" size={18} color={theme.colors.primary} strokeWidth={2} />
+        <Text style={styles.editProfileText}>Muokkaa profiilia</Text>
+      </Pressable>
 
       <View style={styles.statsCard}>
         <View style={styles.statItem}>
@@ -150,7 +172,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  notificationButton: {
+  topActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+  },
+  topIconButton: {
     width: 42,
     height: 42,
     alignItems: 'center',
@@ -162,7 +189,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: theme.spacing.lg,
     marginTop: theme.spacing.md,
-    marginBottom: theme.spacing.xl,
+    marginBottom: theme.spacing.md,
   },
   avatar: {
     width: 118,
@@ -210,6 +237,23 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: 15,
     lineHeight: 21,
+  },
+  editProfileButton: {
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.spacing.xs,
+    marginBottom: theme.spacing.xl,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    borderRadius: theme.radius.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.42)',
+  },
+  editProfileText: {
+    color: theme.colors.primary,
+    fontSize: 15,
+    fontWeight: '800',
   },
   statsCard: {
     minHeight: 120,
