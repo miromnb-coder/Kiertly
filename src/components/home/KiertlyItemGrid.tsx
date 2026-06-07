@@ -19,7 +19,7 @@ export type KiertlyGridItem = {
   isAvailable?: boolean;
 };
 
-const allItems: KiertlyGridItem[] = [
+export const kiertlyDefaultItems: KiertlyGridItem[] = [
   {
     id: 'drill',
     title: 'Akkuporakone Bosch',
@@ -71,7 +71,7 @@ const allItems: KiertlyGridItem[] = [
 ];
 
 const itemsByCategory: Record<HomeCategory, KiertlyGridItem[]> = {
-  Kaikki: allItems,
+  Kaikki: kiertlyDefaultItems,
   Lainaa: [],
   Vuokraa: [],
   Vaihda: [],
