@@ -11,6 +11,7 @@ import {
 } from '../src/components/home/KiertlyCategoryChips';
 import { KiertlyItemGrid, type KiertlyGridItem } from '../src/components/home/KiertlyItemGrid';
 import { KiertlyItemDetailScreen } from '../src/components/item/KiertlyItemDetailScreen';
+import { KiertlyMessagesScreen } from '../src/components/messages/KiertlyMessagesScreen';
 import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
 import { KiertlySearchEmptyState } from '../src/components/search/KiertlySearchEmptyState';
 import { KiertlySearchHeader, type KiertlySearchMode } from '../src/components/search/KiertlySearchHeader';
@@ -44,6 +45,11 @@ export default function HomeScreen() {
     setActiveTab('home');
   }
 
+  function handleTabPress(tab: BottomTabKey) {
+    setSelectedItem(undefined);
+    setActiveTab(tab);
+  }
+
   function renderMainContent() {
     if (activeTab === 'browse') {
       return (
@@ -52,6 +58,10 @@ export default function HomeScreen() {
           <KiertlyCategoryGrid onCategoryPress={openHomeCategory} />
         </ScrollView>
       );
+    }
+
+    if (activeTab === 'messages') {
+      return <KiertlyMessagesScreen />;
     }
 
     return (
@@ -103,7 +113,7 @@ export default function HomeScreen() {
       ) : (
         <>
           {renderMainContent()}
-          <KiertlyBottomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
+          <KiertlyBottomTabBar activeTab={activeTab} onTabPress={handleTabPress} />
         </>
       )}
     </SafeAreaView>
