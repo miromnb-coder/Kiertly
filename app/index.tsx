@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import type { Session } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { KiertlyAuthStartScreen } from '../src/components/auth/KiertlyAuthStartScreen';
@@ -28,12 +29,14 @@ import { KiertlySearchResults } from '../src/components/search/KiertlySearchResu
 import { KiertlySearchTabs } from '../src/components/search/KiertlySearchTabs';
 import { KiertlyShareScreen } from '../src/components/share/KiertlyShareScreen';
 import { theme } from '../src/constants/theme';
+import { supabase } from '../src/lib/supabase';
 
 type ProfileSubscreen = 'main' | 'ownItems' | 'editItem';
 type AuthScreen = 'start' | 'email';
 
 export default function HomeScreen() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [authScreen, setAuthScreen] = useState<AuthScreen>('start');
   const [activeTab, setActiveTab] = useState<BottomTabKey>('home');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -48,9 +51,30 @@ export default function HomeScreen() {
 
   const searchableItems = [...sharedItems, ...kiertlyDefaultItems];
 
-  function completeMockAuth() {
-    setIsAuthenticated(true);
-  }
+  useEffect(() => {
+    let isMounted = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!isMounted) {
+        return;
+      }
+
+      setSession(data.session);
+      setIsAuthLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      setIsAuthLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   function closeSearch() {
     setIsSearchOpen(false);
@@ -183,20 +207,28 @@ export default function HomeScreen() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (isAuthLoading) {
+    return (
+      <SafeAreaView style={styles.loadingScreen} edges={['top', 'bottom']}>
+        <ActivityIndicator color={theme.colors.primary} size="large" />
+      </SafeAreaView>
+    );
+  }
+
+  if (!session) {
     if (authScreen === 'email') {
       return (
         <KiertlyEmailAuthScreen
           onBack={() => setAuthScreen('start')}
-          onContinue={completeMockAuth}
+          onAuthenticated={() => setAuthScreen('start')}
         />
       );
     }
 
     return (
       <KiertlyAuthStartScreen
-        onAppleContinue={completeMockAuth}
-        onGoogleContinue={completeMockAuth}
+        onAppleContinue={() => setAuthScreen('email')}
+        onGoogleContinue={() => setAuthScreen('email')}
         onEmailContinue={() => setAuthScreen('email')}
       />
     );
@@ -254,6 +286,12 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  loadingScreen: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: theme.colors.background,
   },
   pageContent: {
