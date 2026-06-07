@@ -11,7 +11,8 @@ import {
 } from '../src/components/home/KiertlyCategoryChips';
 import { KiertlyItemGrid, type KiertlyGridItem } from '../src/components/home/KiertlyItemGrid';
 import { KiertlyItemDetailScreen } from '../src/components/item/KiertlyItemDetailScreen';
-import { KiertlyMessagesScreen } from '../src/components/messages/KiertlyMessagesScreen';
+import { KiertlyChatScreen } from '../src/components/messages/KiertlyChatScreen';
+import { KiertlyMessagesScreen, type MessageThread } from '../src/components/messages/KiertlyMessagesScreen';
 import { KiertlyProfileScreen } from '../src/components/profile/KiertlyProfileScreen';
 import { KiertlySearchBar } from '../src/components/home/KiertlySearchBar';
 import { KiertlySearchEmptyState } from '../src/components/search/KiertlySearchEmptyState';
@@ -28,6 +29,7 @@ export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState<HomeCategory>('Kaikki');
   const [sharedItems, setSharedItems] = useState<KiertlyGridItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<KiertlyGridItem | undefined>();
+  const [selectedThread, setSelectedThread] = useState<MessageThread | undefined>();
 
   function closeSearch() {
     setIsSearchOpen(false);
@@ -48,6 +50,7 @@ export default function HomeScreen() {
 
   function handleTabPress(tab: BottomTabKey) {
     setSelectedItem(undefined);
+    setSelectedThread(undefined);
     setActiveTab(tab);
   }
 
@@ -62,7 +65,7 @@ export default function HomeScreen() {
     }
 
     if (activeTab === 'messages') {
-      return <KiertlyMessagesScreen />;
+      return <KiertlyMessagesScreen onThreadPress={setSelectedThread} />;
     }
 
     if (activeTab === 'profile') {
@@ -87,6 +90,10 @@ export default function HomeScreen() {
         />
       </ScrollView>
     );
+  }
+
+  if (selectedThread && !isSearchOpen) {
+    return <KiertlyChatScreen thread={selectedThread} onBack={() => setSelectedThread(undefined)} />;
   }
 
   if (selectedItem && !isSearchOpen) {
