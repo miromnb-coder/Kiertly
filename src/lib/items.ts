@@ -16,6 +16,7 @@ type ItemRow = {
   filter_categories: string[] | null;
   category_label: string | null;
   detail_description: string | null;
+  location_label: string | null;
   owner_name: string | null;
   is_available: boolean | null;
   created_at: string;
@@ -37,6 +38,8 @@ function rowToGridItem(row: ItemRow): KiertlyGridItem {
     filterCategories: (row.filter_categories ?? []) as HomeCategory[],
     categoryLabel: row.category_label ?? undefined,
     detailDescription: row.detail_description ?? undefined,
+    locationLabel: row.location_label ?? undefined,
+    createdAt: row.created_at,
     ownerId: row.user_id,
     ownerName: row.owner_name ?? undefined,
     isAvailable: row.is_available ?? true,
@@ -59,6 +62,7 @@ function itemToPayload(item: KiertlyGridItem, userId?: string) {
     filter_categories: item.filterCategories ?? [],
     category_label: item.categoryLabel ?? null,
     detail_description: item.detailDescription ?? null,
+    location_label: item.locationLabel?.trim() || 'Sijainti lisäämättä',
     owner_name: item.ownerName ?? null,
     is_available: item.isAvailable ?? true,
   };
