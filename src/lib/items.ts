@@ -63,6 +63,20 @@ function itemToPayload(item: KiertlyGridItem, userId?: string) {
   };
 }
 
+export async function fetchPublicItems() {
+  const { data, error } = await supabase
+    .from('items')
+    .select('*')
+    .eq('is_available', true)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((row) => rowToGridItem(row as ItemRow));
+}
+
 export async function fetchOwnItems(userId: string) {
   const { data, error } = await supabase
     .from('items')
