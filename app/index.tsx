@@ -181,6 +181,47 @@ export default function HomeScreen() {
     });
   }
 
+  function syncItemAvailabilityFromThread(threadToSync: MessageThread) {
+    if (!threadToSync.itemId) {
+      return;
+    }
+
+    const shouldMarkUnavailable = threadToSync.requestStatus === 'accepted';
+    const shouldMarkAvailable = threadToSync.requestStatus === 'completed';
+
+    if (!shouldMarkUnavailable && !shouldMarkAvailable) {
+      return;
+    }
+
+    const nextAvailability = shouldMarkAvailable;
+
+    setOwnItems((currentItems) =>
+      currentItems.map((item) =>
+        item.id === threadToSync.itemId ? { ...item, isAvailable: nextAvailability } : item,
+      ),
+    );
+    setPublicItems((currentItems) => {
+      if (shouldMarkUnavailable) {
+        return currentItems.filter((item) => item.id !== threadToSync.itemId);
+      }
+
+      return currentItems.map((item) =>
+        item.id === threadToSync.itemId ? { ...item, isAvailable: nextAvailability } : item,
+      );
+    });
+    setSelectedItem((currentItem) =>
+      currentItem?.id === threadToSync.itemId
+        ? { ...currentItem, isAvailable: nextAvailability }
+        : currentItem,
+    );
+  }
+
+  function handleThreadUpdated(updatedThread: MessageThread) {
+    upsertMessageThread(updatedThread);
+    setSelectedThread(updatedThread);
+    syncItemAvailabilityFromThread(updatedThread);
+  }
+
   async function signOut() {
     resetNavigationState();
     setOwnItems([]);
@@ -302,7 +343,7 @@ export default function HomeScreen() {
     }
 
     if (!item.ownerId) {
-      Alert.alert('Pyyntöä ei voi lähettää', 'Tällä tavaralla ei ole vielä omistajatietoa.');
+      Alert.alert('Esimerkkitavara', 'Tämä on etusivun esimerkkitavara. Lisää tai avaa oikea käyttäjän tavara lähettääksesi lainapyynnön.');
       return;
     }
 
@@ -434,7 +475,14 @@ export default function HomeScreen() {
   }
 
   if (selectedThread && !isSearchOpen) {
-    return <KiertlyChatScreen thread={selectedThread} onBack={() => setSelectedThread(undefined)} />;
+    return (
+      <KiertlyChatScreen
+        thread={selectedThread}
+        currentUserId={session.user.id}
+        onBack={() => setSelectedThread(undefined)}
+        onThreadUpdated={handleThreadUpdated}
+      />
+    );
   }
 
   if (selectedItem && !isSearchOpen) {
