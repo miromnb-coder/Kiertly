@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '../../constants/theme';
@@ -9,24 +9,7 @@ type KiertlyAuthStartScreenProps = {
   onEmailContinue: () => void;
 };
 
-function GoogleGlyph() {
-  return (
-    <View style={styles.googleGlyph}>
-      <View style={[styles.googleGlyphClip, styles.googleRedClip]}>
-        <Text style={[styles.googleGlyphLetter, styles.googleRed]}>G</Text>
-      </View>
-      <View style={[styles.googleGlyphClip, styles.googleYellowClip]}>
-        <Text style={[styles.googleGlyphLetter, styles.googleYellow]}>G</Text>
-      </View>
-      <View style={[styles.googleGlyphClip, styles.googleGreenClip]}>
-        <Text style={[styles.googleGlyphLetter, styles.googleGreen]}>G</Text>
-      </View>
-      <View style={[styles.googleGlyphClip, styles.googleBlueClip]}>
-        <Text style={[styles.googleGlyphLetter, styles.googleBlue]}>G</Text>
-      </View>
-    </View>
-  );
-}
+const googleLogoUri = 'https://developers.google.com/identity/images/g-logo.png';
 
 export function KiertlyAuthStartScreen({
   onAppleContinue,
@@ -64,7 +47,7 @@ export function KiertlyAuthStartScreen({
             onPress={onGoogleContinue}
             style={styles.googleButton}
           >
-            <GoogleGlyph />
+            <Image source={{ uri: googleLogoUri }} style={styles.googleLogo} resizeMode="contain" />
             <Text style={styles.googleButtonText}>Jatka Google-tilillä</Text>
           </Pressable>
 
@@ -164,58 +147,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.28)',
   },
-  googleGlyph: {
-    position: 'relative',
-    width: 34,
-    height: 34,
-  },
-  googleGlyphClip: {
-    position: 'absolute',
-    overflow: 'hidden',
-  },
-  googleGlyphLetter: {
-    position: 'absolute',
-    top: -4,
-    left: 0,
-    fontSize: 32,
-    fontWeight: '900',
-    lineHeight: 38,
-  },
-  googleRedClip: {
-    top: 0,
-    left: 0,
-    width: 34,
-    height: 11,
-  },
-  googleYellowClip: {
-    top: 10,
-    left: 0,
-    width: 17,
-    height: 13,
-  },
-  googleGreenClip: {
-    top: 20,
-    left: 0,
-    width: 23,
-    height: 14,
-  },
-  googleBlueClip: {
-    top: 10,
-    right: 0,
-    width: 19,
-    height: 24,
-  },
-  googleRed: {
-    color: '#DB4437',
-  },
-  googleYellow: {
-    color: '#F4B400',
-  },
-  googleGreen: {
-    color: '#0F9D58',
-  },
-  googleBlue: {
-    color: '#4285F4',
+  googleLogo: {
+    width: 28,
+    height: 28,
   },
   googleButtonText: {
     color: '#405032',
