@@ -1,6 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { KiertlyAuthStartScreen } from '../src/components/auth/KiertlyAuthStartScreen';
@@ -29,6 +29,13 @@ import { KiertlySearchResults } from '../src/components/search/KiertlySearchResu
 import { KiertlySearchTabs } from '../src/components/search/KiertlySearchTabs';
 import { KiertlyShareScreen } from '../src/components/share/KiertlyShareScreen';
 import { theme } from '../src/constants/theme';
+import {
+  createOwnItem,
+  deleteOwnItem,
+  fetchOwnItems,
+  updateOwnItem,
+  updateOwnItemAvailability,
+} from '../src/lib/items';
 import { supabase } from '../src/lib/supabase';
 
 type ProfileSubscreen = 'main' | 'ownItems' | 'editItem';
@@ -77,6 +84,35 @@ export default function HomeScreen() {
     };
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadOwnItems() {
+      if (!session?.user.id) {
+        setSharedItems([]);
+        return;
+      }
+
+      try {
+        const items = await fetchOwnItems(session.user.id);
+
+        if (isMounted) {
+          setSharedItems(items);
+        }
+      } catch {
+        if (isMounted) {
+          Alert.alert('Tavaroita ei voitu hakea', 'Yritä hetken päästä uudelleen.');
+        }
+      }
+    }
+
+    loadOwnItems();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [session?.user.id]);
+
   function resetNavigationState() {
     setActiveTab('home');
     setIsSearchOpen(false);
@@ -91,6 +127,7 @@ export default function HomeScreen() {
 
   async function signOut() {
     resetNavigationState();
+    setSharedItems([]);
     setAuthScreen('start');
     await supabase.auth.signOut();
   }
@@ -112,8 +149,14 @@ export default function HomeScreen() {
     setProfileSubscreen('main');
   }
 
-  function createSharedItem(item: KiertlyGridItem) {
-    setSharedItems((currentItems) => [item, ...currentItems]);
+  async function createSharedItem(item: KiertlyGridItem) {
+    if (!session?.user.id) {
+      throw new Error('Kirjaudu sisään ennen tavaran lisäämistä.');
+    }
+
+    const createdItem = await createOwnItem(item, session.user.id);
+
+    setSharedItems((currentItems) => [createdItem, ...currentItems]);
     setActiveCategory('Kaikki');
     setActiveTab('home');
     setProfileSubscreen('main');
@@ -132,34 +175,45 @@ export default function HomeScreen() {
     setProfileSubscreen('editItem');
   }
 
-  function saveItem(updatedItem: KiertlyGridItem) {
+  async function saveItem(updatedItem: KiertlyGridItem) {
+    const savedItem = await updateOwnItem(updatedItem);
+
     setSharedItems((currentItems) =>
-      currentItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
+      currentItems.map((item) => (item.id === savedItem.id ? savedItem : item)),
     );
     setSelectedItem((currentItem) =>
-      currentItem?.id === updatedItem.id ? updatedItem : currentItem,
+      currentItem?.id === savedItem.id ? savedItem : currentItem,
     );
     setEditingItem(undefined);
     setProfileSubscreen('ownItems');
   }
 
-  function deleteItem(itemId: string) {
-    setSharedItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
-    setSelectedItem((currentItem) => (currentItem?.id === itemId ? undefined : currentItem));
+  async function deleteItem(itemId: string) {
+    try {
+      await deleteOwnItem(itemId);
+      setSharedItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
+      setSelectedItem((currentItem) => (currentItem?.id === itemId ? undefined : currentItem));
+    } catch {
+      Alert.alert('Poisto epäonnistui', 'Tavaraa ei voitu poistaa. Yritä uudelleen.');
+    }
   }
 
-  function toggleAvailability(itemToToggle: KiertlyGridItem) {
-    const updatedItem = {
-      ...itemToToggle,
-      isAvailable: itemToToggle.isAvailable === false,
-    };
+  async function toggleAvailability(itemToToggle: KiertlyGridItem) {
+    try {
+      const updatedItem = await updateOwnItemAvailability(
+        itemToToggle.id,
+        itemToToggle.isAvailable === false,
+      );
 
-    setSharedItems((currentItems) =>
-      currentItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
-    );
-    setSelectedItem((currentItem) =>
-      currentItem?.id === updatedItem.id ? updatedItem : currentItem,
-    );
+      setSharedItems((currentItems) =>
+        currentItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
+      );
+      setSelectedItem((currentItem) =>
+        currentItem?.id === updatedItem.id ? updatedItem : currentItem,
+      );
+    } catch {
+      Alert.alert('Saatavuutta ei voitu muuttaa', 'Yritä hetken päästä uudelleen.');
+    }
   }
 
   function renderMainContent() {
