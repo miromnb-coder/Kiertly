@@ -1,10 +1,12 @@
 import { Feather } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
+import type { KiertlyProfile } from '../../lib/profiles';
 
 type KiertlyProfileScreenProps = {
   sharedItemCount: number;
+  profile?: KiertlyProfile | null;
   userEmail?: string | null;
   onOwnItemsPress: () => void;
   onSignOut: () => void;
@@ -12,12 +14,14 @@ type KiertlyProfileScreenProps = {
 
 export function KiertlyProfileScreen({
   sharedItemCount,
+  profile,
   userEmail,
   onOwnItemsPress,
   onSignOut,
 }: KiertlyProfileScreenProps) {
-  const displayEmail = userEmail ?? 'Ei sähköpostia';
-  const displayName = userEmail ? userEmail.split('@')[0] : 'Kiertly-käyttäjä';
+  const displayEmail = profile?.email || userEmail || 'Ei sähköpostia';
+  const displayName = profile?.displayName || displayEmail.split('@')[0] || 'Kiertly-käyttäjä';
+  const displayLocation = profile?.location || 'Sijainti lisäämättä';
 
   return (
     <View style={styles.screenContent}>
@@ -30,11 +34,19 @@ export function KiertlyProfileScreen({
 
       <View style={styles.profileHeader}>
         <View style={styles.avatar}>
-          <Feather name="user" size={52} color={theme.colors.primary} strokeWidth={1.8} />
+          {profile?.avatarUrl ? (
+            <Image source={{ uri: profile.avatarUrl }} style={styles.avatarImage} />
+          ) : (
+            <Feather name="user" size={52} color={theme.colors.primary} strokeWidth={1.8} />
+          )}
         </View>
         <View style={styles.profileTextWrap}>
           <Text style={styles.name} numberOfLines={1}>{displayName}</Text>
           <Text style={styles.userType} numberOfLines={1}>{displayEmail}</Text>
+          <View style={styles.locationRow}>
+            <Feather name="map-pin" size={13} color={theme.colors.mutedText} strokeWidth={2} />
+            <Text style={styles.locationText} numberOfLines={1}>{displayLocation}</Text>
+          </View>
           <Text style={styles.bio}>Teen arjesta kestävämpää jakamalla ja lainaamalla.</Text>
         </View>
       </View>
@@ -159,6 +171,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: theme.radius.pill,
     backgroundColor: '#EEF3E4',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   profileTextWrap: {
     flex: 1,
@@ -174,6 +191,18 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.sm,
     color: theme.colors.mutedText,
     fontSize: 15,
+    fontWeight: '700',
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 6,
+  },
+  locationText: {
+    flex: 1,
+    color: theme.colors.mutedText,
+    fontSize: 13,
     fontWeight: '700',
   },
   bio: {
