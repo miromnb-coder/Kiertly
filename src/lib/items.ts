@@ -11,6 +11,8 @@ type ItemRow = {
   likes: number | null;
   background_color: string | null;
   image_uri: string | null;
+  image_uris: string[] | null;
+  image_paths: string[] | null;
   filter_categories: string[] | null;
   category_label: string | null;
   detail_description: string | null;
@@ -20,6 +22,8 @@ type ItemRow = {
 };
 
 function rowToGridItem(row: ItemRow): KiertlyGridItem {
+  const imageUris = row.image_uris?.length ? row.image_uris : row.image_uri ? [row.image_uri] : [];
+
   return {
     id: row.id,
     title: row.title,
@@ -27,7 +31,9 @@ function rowToGridItem(row: ItemRow): KiertlyGridItem {
     highlight: row.highlight ?? '',
     likes: row.likes ?? 0,
     backgroundColor: row.background_color ?? '#EFE5D6',
-    imageUri: row.image_uri ?? undefined,
+    imageUri: imageUris[0] ?? undefined,
+    imageUris,
+    imagePaths: row.image_paths ?? [],
     filterCategories: (row.filter_categories ?? []) as HomeCategory[],
     categoryLabel: row.category_label ?? undefined,
     detailDescription: row.detail_description ?? undefined,
@@ -37,6 +43,8 @@ function rowToGridItem(row: ItemRow): KiertlyGridItem {
 }
 
 function itemToPayload(item: KiertlyGridItem, userId?: string) {
+  const imageUris = item.imageUris?.length ? item.imageUris : item.imageUri ? [item.imageUri] : [];
+
   return {
     ...(userId ? { user_id: userId } : {}),
     title: item.title,
@@ -44,7 +52,9 @@ function itemToPayload(item: KiertlyGridItem, userId?: string) {
     highlight: item.highlight,
     likes: item.likes,
     background_color: item.backgroundColor,
-    image_uri: item.imageUri ?? null,
+    image_uri: imageUris[0] ?? null,
+    image_uris: imageUris,
+    image_paths: item.imagePaths ?? [],
     filter_categories: item.filterCategories ?? [],
     category_label: item.categoryLabel ?? null,
     detail_description: item.detailDescription ?? null,
