@@ -5,18 +5,36 @@ import { theme } from '../../constants/theme';
 
 type KiertlyItemActionBarProps = {
   primaryLabel: string;
+  isSubmitting?: boolean;
+  onChatPress: () => void;
+  onPrimaryPress: () => void;
 };
 
-export function KiertlyItemActionBar({ primaryLabel }: KiertlyItemActionBarProps) {
+export function KiertlyItemActionBar({
+  primaryLabel,
+  isSubmitting = false,
+  onChatPress,
+  onPrimaryPress,
+}: KiertlyItemActionBarProps) {
   return (
     <View style={styles.actionBar}>
-      <Pressable accessibilityRole="button" style={styles.chatButton}>
+      <Pressable
+        accessibilityRole="button"
+        disabled={isSubmitting}
+        onPress={onChatPress}
+        style={[styles.chatButton, isSubmitting && styles.disabledButton]}
+      >
         <Feather name="message-circle" size={22} color={theme.colors.primary} />
         <Text style={styles.chatText}>Chattaa</Text>
       </Pressable>
 
-      <Pressable accessibilityRole="button" style={styles.primaryButton}>
-        <Text style={styles.primaryText}>{primaryLabel}</Text>
+      <Pressable
+        accessibilityRole="button"
+        disabled={isSubmitting}
+        onPress={onPrimaryPress}
+        style={[styles.primaryButton, isSubmitting && styles.disabledButton]}
+      >
+        <Text style={styles.primaryText}>{isSubmitting ? 'Lähetetään...' : primaryLabel}</Text>
       </Pressable>
     </View>
   );
@@ -48,6 +66,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.primary,
     backgroundColor: 'rgba(255, 255, 255, 0.38)',
+  },
+  disabledButton: {
+    opacity: 0.72,
   },
   chatText: {
     color: theme.colors.primary,
