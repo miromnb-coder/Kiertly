@@ -38,6 +38,7 @@ import {
   updateOwnItemAvailability,
 } from '../src/lib/items';
 import { deleteItemPhotos, uploadItemPhotos } from '../src/lib/itemPhotos';
+import { fetchOwnProfile, type KiertlyProfile } from '../src/lib/profiles';
 import { supabase } from '../src/lib/supabase';
 
 type ProfileSubscreen = 'main' | 'ownItems' | 'editItem';
@@ -54,14 +55,15 @@ export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState<HomeCategory>('Kaikki');
   const [ownItems, setOwnItems] = useState<KiertlyGridItem[]>([]);
   const [publicItems, setPublicItems] = useState<KiertlyGridItem[]>([]);
+  const [profile, setProfile] = useState<KiertlyProfile | null>(null);
   const [selectedItem, setSelectedItem] = useState<KiertlyGridItem | undefined>();
   const [selectedThread, setSelectedThread] = useState<MessageThread | undefined>();
   const [profileSubscreen, setProfileSubscreen] = useState<ProfileSubscreen>('main');
   const [editingItem, setEditingItem] = useState<KiertlyGridItem | undefined>();
 
   const searchableItems = [...publicItems, ...kiertlyDefaultItems];
-  const userEmail = session?.user.email ?? null;
-  const ownerDisplayName = userEmail ? userEmail.split('@')[0] : 'Kiertly-käyttäjä';
+  const userEmail = profile?.email || session?.user.email || null;
+  const ownerDisplayName = profile?.displayName || userEmail?.split('@')[0] || 'Kiertly-käyttäjä';
 
   useEffect(() => {
     let isMounted = true;
@@ -91,36 +93,39 @@ export default function HomeScreen() {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadItems() {
+    async function loadItemsAndProfile() {
       if (!session?.user.id) {
         setOwnItems([]);
         setPublicItems([]);
+        setProfile(null);
         return;
       }
 
       try {
-        const [nextOwnItems, nextPublicItems] = await Promise.all([
+        const [nextProfile, nextOwnItems, nextPublicItems] = await Promise.all([
+          fetchOwnProfile(session.user.id, session.user.email),
           fetchOwnItems(session.user.id),
           fetchPublicItems(),
         ]);
 
         if (isMounted) {
+          setProfile(nextProfile);
           setOwnItems(nextOwnItems);
           setPublicItems(nextPublicItems);
         }
       } catch {
         if (isMounted) {
-          Alert.alert('Tavaroita ei voitu hakea', 'Yritä hetken päästä uudelleen.');
+          Alert.alert('Tietoja ei voitu hakea', 'Yritä hetken päästä uudelleen.');
         }
       }
     }
 
-    loadItems();
+    loadItemsAndProfile();
 
     return () => {
       isMounted = false;
     };
-  }, [session?.user.id]);
+  }, [session?.user.id, session?.user.email]);
 
   function resetNavigationState() {
     setActiveTab('home');
@@ -155,6 +160,7 @@ export default function HomeScreen() {
     resetNavigationState();
     setOwnItems([]);
     setPublicItems([]);
+    setProfile(null);
     setAuthScreen('start');
     await supabase.auth.signOut();
   }
@@ -301,6 +307,7 @@ export default function HomeScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.pageContent}>
           <KiertlyProfileScreen
             sharedItemCount={ownItems.length}
+            profile={profile}
             userEmail={userEmail}
             onOwnItemsPress={() => setProfileSubscreen('ownItems')}
             onSignOut={signOut}
