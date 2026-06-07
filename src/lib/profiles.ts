@@ -5,8 +5,15 @@ export type KiertlyProfile = {
   displayName: string;
   email: string;
   location: string;
+  bio?: string;
   avatarUrl?: string;
   createdAt: string;
+};
+
+export type UpdateOwnProfileInput = {
+  displayName: string;
+  location: string;
+  bio?: string;
 };
 
 type ProfileRow = {
@@ -14,6 +21,7 @@ type ProfileRow = {
   display_name: string | null;
   email: string | null;
   location: string | null;
+  bio: string | null;
   avatar_url: string | null;
   created_at: string;
 };
@@ -29,6 +37,7 @@ function rowToProfile(row: ProfileRow): KiertlyProfile {
     displayName: row.display_name ?? getDisplayNameFromEmail(row.email),
     email: row.email ?? '',
     location: row.location ?? 'Helsinki',
+    bio: row.bio ?? undefined,
     avatarUrl: row.avatar_url ?? undefined,
     createdAt: row.created_at,
   };
@@ -71,4 +80,24 @@ export async function fetchOwnProfile(userId: string, email?: string | null) {
   }
 
   return ensureOwnProfile(userId, email);
+}
+
+export async function updateOwnProfile(userId: string, updates: UpdateOwnProfileInput) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({
+      display_name: updates.displayName.trim(),
+      location: updates.location.trim() || 'Sijainti lisäämättä',
+      bio: updates.bio?.trim() || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId)
+    .select('*')
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return rowToProfile(data as ProfileRow);
 }
