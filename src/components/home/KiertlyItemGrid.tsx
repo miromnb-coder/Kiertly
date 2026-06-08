@@ -24,69 +24,7 @@ export type KiertlyGridItem = {
   isAvailable?: boolean;
 };
 
-export const kiertlyDefaultItems: KiertlyGridItem[] = [
-  {
-    id: 'drill',
-    title: 'Akkuporakone Bosch',
-    meta: 'Lainaa naapurilta • Helsinki, Töölö',
-    highlight: 'Lainaa ilmaiseksi',
-    likes: 12,
-    backgroundColor: '#E7DDC9',
-    categoryLabel: 'Työkalut',
-    locationLabel: 'Helsinki, Töölö',
-    isAvailable: true,
-    detailDescription:
-      'Tehokas ja kevyt Boschin akkuporakone sopii kotiprojekteihin kuin pieniin remontteihin. Mukana akku ja laturi. Voin tarvittaessa neuvoa käytössä. Noudettavissa joustavasti.',
-  },
-  {
-    id: 'suitcase',
-    title: 'Matkalaukku',
-    meta: 'Vuokraa helposti • Helsinki, Kamppi',
-    highlight: '4 € / päivä',
-    likes: 7,
-    backgroundColor: '#EFE5D6',
-    categoryLabel: 'Matkailu',
-    locationLabel: 'Helsinki, Kamppi',
-    isAvailable: true,
-    detailDescription:
-      'Siisti ja kevyt matkalaukku viikonloppureissuille tai pidemmälle matkalle. Nouto onnistuu joustavasti lähialueelta.',
-  },
-  {
-    id: 'chairs',
-    title: 'Retkituolit 2 kpl',
-    meta: 'Vaihda tai lainaa • Helsinki, Punavuori',
-    highlight: 'Vaihda',
-    likes: 5,
-    backgroundColor: '#DDE4D0',
-    categoryLabel: 'Retkeily',
-    locationLabel: 'Helsinki, Punavuori',
-    isAvailable: true,
-    detailDescription:
-      'Kaksi kokoontaitettavaa retkituolia mökille, piknikille tai retkelle. Kevyet kantaa ja helppo pakata mukaan.',
-  },
-  {
-    id: 'speaker',
-    title: 'Bluetooth-kaiutin',
-    meta: 'Vuokraa lähialueelta • Helsinki, Kallio',
-    highlight: '2 € / päivä',
-    likes: 9,
-    backgroundColor: '#E4DED3',
-    categoryLabel: 'Elektroniikka',
-    locationLabel: 'Helsinki, Kallio',
-    isAvailable: true,
-    detailDescription:
-      'Pieni mutta tehokas bluetooth-kaiutin juhliin, mökille tai piknikille. Akku kestää hyvin yhden päivän käytön.',
-  },
-];
-
-const itemsByCategory: Record<HomeCategory, KiertlyGridItem[]> = {
-  Kaikki: kiertlyDefaultItems,
-  Lainaa: [],
-  Vuokraa: [],
-  Vaihda: [],
-  Ilmaiset: [],
-  Lähellä: [],
-};
+export const kiertlyDefaultItems: KiertlyGridItem[] = [];
 
 type KiertlyItemGridProps = {
   activeCategory: HomeCategory;
@@ -109,13 +47,9 @@ function getDisplayMeta(item: KiertlyGridItem) {
 }
 
 export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: KiertlyItemGridProps) {
-  const baseItems = itemsByCategory[activeCategory];
-  const matchingSharedItems = sharedItems.filter(
+  const items = sharedItems.filter(
     (item) => activeCategory === 'Kaikki' || item.filterCategories?.includes(activeCategory),
   );
-  const items = activeCategory === 'Kaikki'
-    ? [...matchingSharedItems, ...baseItems]
-    : matchingSharedItems;
 
   if (items.length === 0) {
     return (
@@ -125,7 +59,7 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
         </View>
         <Text style={styles.emptyTitle}>Ei vielä tavaroita</Text>
         <Text style={styles.emptyDescription}>
-          Tähän kategoriaan lisätään myöhemmin tavaroita.
+          Kun käyttäjät lisäävät tavaroita, ne näkyvät täällä. Voit lisätä ensimmäisen Jaa-painikkeesta.
         </Text>
       </View>
     );
