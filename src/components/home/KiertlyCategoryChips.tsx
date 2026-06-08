@@ -19,6 +19,7 @@ export function KiertlyCategoryChips({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.scroll}
       contentContainerStyle={styles.content}
     >
       {homeCategories.map((category) => {
@@ -40,6 +41,11 @@ export function KiertlyCategoryChips({
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    maxHeight: 67,
+    flexGrow: 0,
+    backgroundColor: theme.colors.background,
+  },
   content: {
     gap: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
