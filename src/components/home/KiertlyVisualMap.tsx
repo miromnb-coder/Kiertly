@@ -1,26 +1,98 @@
 import { Feather } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE, type Region } from 'react-native-maps';
 
 import { theme } from '../../constants/theme';
 import type { KiertlyGridItem } from './KiertlyItemGrid';
 
-type MapPinBase = {
-  top: number;
-  left: number;
+type MapCoordinate = {
+  latitude: number;
+  longitude: number;
 };
 
-type MapPin = MapPinBase & {
+type MapPin = {
   label: string;
   icon: keyof typeof Feather.glyphMap;
+  coordinate: MapCoordinate;
 };
 
-const pinPositions: MapPinBase[] = [
-  { top: 56, left: 84 },
-  { top: 95, left: 260 },
-  { top: 150, left: 350 },
-  { top: 214, left: 48 },
-  { top: 248, left: 235 },
-  { top: 316, left: 328 },
+const defaultRegion: Region = {
+  latitude: 60.1699,
+  longitude: 24.9384,
+  latitudeDelta: 0.022,
+  longitudeDelta: 0.018,
+};
+
+const userCoordinate: MapCoordinate = {
+  latitude: 60.1699,
+  longitude: 24.9384,
+};
+
+const pinCoordinates: MapCoordinate[] = [
+  { latitude: 60.1742, longitude: 24.9294 },
+  { latitude: 60.1731, longitude: 24.9479 },
+  { latitude: 60.1677, longitude: 24.9557 },
+  { latitude: 60.1648, longitude: 24.9274 },
+  { latitude: 60.1625, longitude: 24.9443 },
+  { latitude: 60.1762, longitude: 24.9413 },
+];
+
+const mapStyle = [
+  {
+    elementType: 'geometry',
+    stylers: [{ color: '#F3EFE5' }],
+  },
+  {
+    elementType: 'labels.icon',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#8D8A7C' }],
+  },
+  {
+    elementType: 'labels.text.stroke',
+    stylers: [{ color: '#F7F4EC' }],
+  },
+  {
+    featureType: 'administrative',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#DED8C9' }],
+  },
+  {
+    featureType: 'landscape.man_made',
+    elementType: 'geometry',
+    stylers: [{ color: '#F1EDE3' }],
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'geometry.fill',
+    stylers: [{ color: '#CCD8B5' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [{ color: '#FFFFFF' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#E6E0D0' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#A39F91' }],
+  },
+  {
+    featureType: 'transit',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry.fill',
+    stylers: [{ color: '#C9DCE4' }],
+  },
 ];
 
 type KiertlyVisualMapProps = {
@@ -29,25 +101,25 @@ type KiertlyVisualMapProps = {
 
 function getMapPin(item: KiertlyGridItem, index: number): MapPin {
   const categories = item.filterCategories ?? [];
-  const position = pinPositions[index % pinPositions.length];
+  const coordinate = pinCoordinates[index % pinCoordinates.length];
 
   if (item.highlight.includes('/ päivä') || categories.includes('Vuokraa')) {
-    return { ...position, label: 'Vuokraa', icon: 'umbrella' };
+    return { coordinate, label: 'Vuokraa', icon: 'umbrella' };
   }
 
   if (item.highlight === 'Vaihda' || categories.includes('Vaihda')) {
-    return { ...position, label: 'Vaihda', icon: 'repeat' };
+    return { coordinate, label: 'Vaihda', icon: 'repeat' };
   }
 
   if (item.highlight === 'Ilmainen' || categories.includes('Ilmaiset')) {
-    return { ...position, label: 'Ilmainen', icon: 'gift' };
+    return { coordinate, label: 'Ilmainen', icon: 'gift' };
   }
 
   if (categories.includes('Työkalut')) {
-    return { ...position, label: 'Lainaa', icon: 'tool' };
+    return { coordinate, label: 'Lainaa', icon: 'tool' };
   }
 
-  return { ...position, label: 'Lainaa', icon: 'box' };
+  return { coordinate, label: 'Lainaa', icon: 'box' };
 }
 
 function getItemCountText(count: number) {
@@ -55,58 +127,54 @@ function getItemCountText(count: number) {
 }
 
 export function KiertlyVisualMap({ items = [] }: KiertlyVisualMapProps) {
-  const visiblePins = items.slice(0, pinPositions.length).map(getMapPin);
+  const visiblePins = items.slice(0, pinCoordinates.length).map(getMapPin);
 
   return (
     <View style={styles.mapWrap}>
-      <View style={[styles.park, styles.parkOne]} />
-      <View style={[styles.park, styles.parkTwo]} />
-      <View style={[styles.park, styles.parkThree]} />
-      <View style={[styles.waterLine, styles.waterOne]} />
-      <View style={[styles.waterLine, styles.waterTwo]} />
-
-      {Array.from({ length: 16 }).map((_, index) => (
-        <View
-          key={`road-v-${index}`}
-          style={[
-            styles.road,
-            styles.verticalRoad,
-            {
-              left: 8 + index * 34,
-              transform: [{ rotate: index % 2 === 0 ? '24deg' : '-18deg' }],
-            },
-          ]}
-        />
-      ))}
-      {Array.from({ length: 10 }).map((_, index) => (
-        <View
-          key={`road-h-${index}`}
-          style={[
-            styles.road,
-            styles.horizontalRoad,
-            {
-              top: 26 + index * 36,
-              transform: [{ rotate: index % 2 === 0 ? '-12deg' : '10deg' }],
-            },
-          ]}
-        />
-      ))}
-
-      <View style={styles.userPulse}>
-        <View style={styles.userDot} />
-      </View>
-
-      {visiblePins.map((pin, index) => (
-        <View key={`${pin.label}-${pin.top}-${pin.left}-${index}`} style={[styles.pin, { top: pin.top, left: pin.left }]}> 
-          <View style={styles.pinInner}>
-            <Text style={styles.pinLabel}>{pin.label}</Text>
-            <Feather name={pin.icon} size={27} color={theme.colors.white} strokeWidth={2.1} />
+      <MapView
+        customMapStyle={mapStyle}
+        initialRegion={defaultRegion}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+        rotateEnabled={false}
+        showsBuildings={false}
+        showsCompass={false}
+        showsIndoors={false}
+        showsPointsOfInterest={false}
+        showsScale={false}
+        showsTraffic={false}
+        style={StyleSheet.absoluteFill}
+        toolbarEnabled={false}
+      >
+        <Marker coordinate={userCoordinate} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>
+          <View style={styles.userPulse}>
+            <View style={styles.userDot} />
           </View>
-          <View style={styles.pinPoint} />
-        </View>
-      ))}
+        </Marker>
 
-      <View style={styles.nearbyCard}>
+        {visiblePins.map((pin, index) => (
+          <Marker
+            key={`${pin.label}-${pin.coordinate.latitude}-${pin.coordinate.longitude}-${index}`}
+            coordinate={pin.coordinate}
+            anchor={{ x: 0.5, y: 0.92 }}
+            tracksViewChanges={false}
+          >
+            <View style={styles.pinShadow}>
+              <View style={styles.pin}>
+                <View style={styles.pinInner}>
+                  <Text style={styles.pinLabel}>{pin.label}</Text>
+                  <Feather name={pin.icon} size={27} color={theme.colors.white} strokeWidth={2.1} />
+                </View>
+                <View style={styles.pinPoint} />
+              </View>
+            </View>
+          </Marker>
+        ))}
+      </MapView>
+
+      <View pointerEvents="none" style={styles.topFade} />
+      <View pointerEvents="none" style={styles.bottomFade} />
+
+      <View pointerEvents="none" style={styles.nearbyCard}>
         <View style={styles.nearbyTitleRow}>
           <Text style={styles.nearbyTitle}>Lähellä sinua</Text>
           <Feather name="map-pin" size={16} color={theme.colors.text} strokeWidth={2} />
@@ -124,76 +192,29 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#F3EFE5',
   },
-  road: {
+  topFade: {
     position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 255, 0.84)',
+    top: 0,
+    right: 0,
+    left: 0,
+    height: 18,
+    backgroundColor: 'rgba(247, 244, 236, 0.18)',
   },
-  verticalRoad: {
-    top: -96,
-    width: 4,
-    height: 660,
-  },
-  horizontalRoad: {
-    left: -98,
-    width: 660,
-    height: 4,
-  },
-  waterLine: {
+  bottomFade: {
     position: 'absolute',
-    width: 25,
-    height: 660,
-    borderRadius: theme.radius.pill,
-    backgroundColor: 'rgba(155, 196, 213, 0.45)',
-  },
-  waterOne: {
-    top: -120,
-    left: 190,
-    transform: [{ rotate: '31deg' }],
-  },
-  waterTwo: {
-    top: -150,
-    left: 302,
-    transform: [{ rotate: '-21deg' }],
-    opacity: 0.45,
-  },
-  park: {
-    position: 'absolute',
-    borderRadius: theme.radius.md,
-    backgroundColor: 'rgba(187, 205, 159, 0.38)',
-  },
-  parkOne: {
-    top: 38,
-    right: 42,
-    width: 86,
-    height: 64,
-    transform: [{ rotate: '-11deg' }],
-  },
-  parkTwo: {
-    left: 20,
-    bottom: 190,
-    width: 98,
-    height: 76,
-    transform: [{ rotate: '14deg' }],
-  },
-  parkThree: {
-    right: 128,
-    bottom: 150,
-    width: 74,
-    height: 56,
-    transform: [{ rotate: '8deg' }],
+    right: 0,
+    bottom: 0,
+    left: 0,
+    height: 130,
+    backgroundColor: 'rgba(247, 244, 236, 0.14)',
   },
   userPulse: {
-    position: 'absolute',
-    top: '29%',
-    left: '48%',
     width: 74,
     height: 74,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: -37,
-    marginTop: -37,
     borderRadius: theme.radius.pill,
-    backgroundColor: 'rgba(80, 150, 226, 0.14)',
+    backgroundColor: 'rgba(80, 150, 226, 0.18)',
   },
   userDot: {
     width: 26,
@@ -203,8 +224,14 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.pill,
     backgroundColor: '#3A91EA',
   },
+  pinShadow: {
+    shadowColor: theme.colors.black,
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 7 },
+    elevation: 4,
+  },
   pin: {
-    position: 'absolute',
     width: 72,
     height: 91,
     alignItems: 'center',
@@ -214,11 +241,6 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 12,
     backgroundColor: theme.colors.primary,
-    shadowColor: theme.colors.black,
-    shadowOpacity: 0.22,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 7 },
-    elevation: 4,
     transform: [{ rotate: '-45deg' }],
   },
   pinInner: {
@@ -244,7 +266,7 @@ const styles = StyleSheet.create({
   nearbyCard: {
     position: 'absolute',
     right: 25,
-    bottom: '42%',
+    bottom: '43%',
     minWidth: 140,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
