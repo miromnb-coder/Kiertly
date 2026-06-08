@@ -14,7 +14,6 @@ import {
 } from '../src/components/home/KiertlyCategoryChips';
 import {
   KiertlyItemGrid,
-  kiertlyDefaultItems,
   type KiertlyGridItem,
 } from '../src/components/home/KiertlyItemGrid';
 import { KiertlyItemDetailScreen } from '../src/components/item/KiertlyItemDetailScreen';
@@ -73,7 +72,7 @@ export default function HomeScreen() {
   const [editingItem, setEditingItem] = useState<KiertlyGridItem | undefined>();
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
 
-  const searchableItems = [...publicItems, ...kiertlyDefaultItems];
+  const searchableItems = publicItems;
   const userEmail = profile?.email || session?.user.email || null;
   const ownerDisplayName = profile?.displayName || userEmail?.split('@')[0] || 'Kiertly-käyttäjä';
 
@@ -360,7 +359,7 @@ export default function HomeScreen() {
     }
 
     if (!item.ownerId) {
-      Alert.alert('Esimerkkitavara', 'Tämä on etusivun esimerkkitavara. Lisää tai avaa oikea käyttäjän tavara lähettääksesi lainapyynnön.');
+      Alert.alert('Tavaraa ei voi pyytää', 'Avaa oikea käyttäjän lisäämä tavara lähettääksesi lainapyynnön.');
       return;
     }
 
@@ -461,7 +460,7 @@ export default function HomeScreen() {
     }
 
     return (
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.pageContent}>
+      <View style={styles.mapContent}>
         <KiertlySearchBar onPress={() => setIsSearchOpen(true)} />
         <KiertlyCategoryChips
           activeCategory={activeCategory}
@@ -472,7 +471,7 @@ export default function HomeScreen() {
           sharedItems={publicItems}
           onItemPress={setSelectedItem}
         />
-      </ScrollView>
+      </View>
     );
   }
 
@@ -580,6 +579,11 @@ const styles = StyleSheet.create({
   },
   pageContent: {
     paddingTop: theme.spacing.sm,
+  },
+  mapContent: {
+    flex: 1,
+    minHeight: 0,
+    backgroundColor: theme.colors.background,
   },
   searchContent: {
     flex: 1,
