@@ -34,42 +34,22 @@ type KiertlyItemGridProps = {
 
 function getAvailabilityBadge(item: KiertlyGridItem) {
   if (item.isAvailable === false) {
-    return {
-      icon: 'pause-circle' as const,
-      text: 'Varattu',
-      isMuted: true,
-    };
+    return { icon: 'pause-circle' as const, text: 'Varattu', isMuted: true };
   }
 
   if (item.highlight.includes('/ päivä') || item.filterCategories?.includes('Vuokraa')) {
-    return {
-      icon: 'tag' as const,
-      text: 'Vuokrattavissa',
-      isMuted: false,
-    };
+    return { icon: 'tag' as const, text: 'Vuokrattavissa', isMuted: false };
   }
 
   if (item.highlight === 'Ilmainen' || item.filterCategories?.includes('Ilmaiset')) {
-    return {
-      icon: 'gift' as const,
-      text: 'Ilmainen',
-      isMuted: false,
-    };
+    return { icon: 'gift' as const, text: 'Ilmainen', isMuted: false };
   }
 
   if (item.highlight === 'Vaihda' || item.filterCategories?.includes('Vaihda')) {
-    return {
-      icon: 'repeat' as const,
-      text: 'Vaihdettavissa',
-      isMuted: false,
-    };
+    return { icon: 'repeat' as const, text: 'Vaihdettavissa', isMuted: false };
   }
 
-  return {
-    icon: 'calendar' as const,
-    text: 'Lainattavissa',
-    isMuted: false,
-  };
+  return { icon: 'calendar' as const, text: 'Lainattavissa', isMuted: false };
 }
 
 function getLocationText(item: KiertlyGridItem) {
@@ -90,6 +70,18 @@ function getInitials(name: string) {
     .toUpperCase() || 'K';
 }
 
+function KiertlyNearbyHeader() {
+  return (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>Lähellä sinua</Text>
+      <View style={styles.locationRow}>
+        <Feather name="map-pin" size={20} color={theme.colors.mutedText} strokeWidth={2.2} />
+        <Text style={styles.locationText}>Helsinki • 2 km säteellä</Text>
+      </View>
+    </View>
+  );
+}
+
 export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: KiertlyItemGridProps) {
   const items = sharedItems.filter(
     (item) => activeCategory === 'Kaikki' || item.filterCategories?.includes(activeCategory),
@@ -97,28 +89,16 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
 
   if (items.length === 0) {
     return (
-      <View style={styles.emptyState}>
-        <View style={styles.emptyIconCircle}>
-          <Feather name="box" size={42} color={theme.colors.primary} strokeWidth={1.8} />
-        </View>
-        <Text style={styles.emptyTitle}>Ei vielä tavaroita</Text>
-        <Text style={styles.emptyDescription}>
-          Kun käyttäjät lisäävät tavaroita, ne näkyvät täällä. Voit lisätä ensimmäisen Jaa-painikkeesta.
-        </Text>
+      <View style={styles.feedWrap}>
+        <KiertlyNearbyHeader />
+        <View style={styles.emptySpace} />
       </View>
     );
   }
 
   return (
     <View style={styles.feedWrap}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Lähellä sinua</Text>
-        <View style={styles.locationRow}>
-          <Feather name="map-pin" size={17} color={theme.colors.mutedText} strokeWidth={2} />
-          <Text style={styles.locationText}>Saatavilla nyt</Text>
-        </View>
-      </View>
-
+      <KiertlyNearbyHeader />
       <View style={styles.list}>
         {items.map((item) => {
           const badge = getAvailabilityBadge(item);
@@ -137,19 +117,15 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
                 ) : (
                   <Feather name="package" size={46} color={theme.colors.primary} strokeWidth={1.7} />
                 )}
-                {item.isAvailable === false ? (
-                  <View style={styles.unavailableOverlay} />
-                ) : null}
+                {item.isAvailable === false ? <View style={styles.unavailableOverlay} /> : null}
               </View>
 
               <View style={styles.cardBody}>
                 <Text numberOfLines={1} style={styles.title}>{item.title}</Text>
-
                 <View style={[styles.badge, badge.isMuted && styles.mutedBadge]}>
                   <Feather name={badge.icon} size={15} color={theme.colors.primary} strokeWidth={2} />
                   <Text numberOfLines={1} style={styles.badgeText}>{badge.text}</Text>
                 </View>
-
                 <View style={styles.ownerRow}>
                   <View style={styles.avatar}>
                     <Text style={styles.avatarText}>{getInitials(ownerName)}</Text>
@@ -174,29 +150,33 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
 
 const styles = StyleSheet.create({
   feedWrap: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: 38,
     paddingBottom: 112,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.sm,
+    marginTop: theme.spacing.xs,
+    marginBottom: theme.spacing.md,
   },
   sectionTitle: {
     color: theme.colors.text,
-    fontSize: 21,
+    fontSize: 23,
     fontWeight: '800',
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 7,
   },
   locationText: {
     color: theme.colors.mutedText,
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  emptySpace: {
+    minHeight: 460,
   },
   list: {
     gap: 0,
@@ -308,35 +288,5 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     borderRadius: theme.radius.pill,
     backgroundColor: 'rgba(255, 255, 255, 0.82)',
-  },
-  emptyState: {
-    flex: 1,
-    minHeight: 420,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: theme.spacing.xl,
-    paddingBottom: 112,
-  },
-  emptyIconCircle: {
-    width: 86,
-    height: 86,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: theme.spacing.lg,
-    borderRadius: theme.radius.pill,
-    backgroundColor: '#EEF3E4',
-  },
-  emptyTitle: {
-    marginBottom: theme.spacing.sm,
-    color: theme.colors.text,
-    fontSize: 22,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  emptyDescription: {
-    color: theme.colors.mutedText,
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
   },
 });
