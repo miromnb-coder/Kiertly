@@ -16,7 +16,7 @@ export function KiertlySearchBar({ onPress }: KiertlySearchBarProps) {
         onPress={onPress}
         style={styles.searchBox}
       >
-        <Feather name="search" size={28} color={theme.colors.text} strokeWidth={1.9} />
+        <Feather name="search" size={30} color={theme.colors.text} strokeWidth={1.9} />
         <Text numberOfLines={1} style={styles.placeholder}>Hae tavaroita tai jäseniä</Text>
         <View style={styles.filterButton}>
           <Feather name="sliders" size={23} color={theme.colors.text} strokeWidth={1.9} />
@@ -28,12 +28,12 @@ export function KiertlySearchBar({ onPress }: KiertlySearchBarProps) {
 
 const styles = StyleSheet.create({
   wrap: {
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.sm,
+    paddingHorizontal: 28,
+    paddingTop: 112,
+    paddingBottom: theme.spacing.md,
   },
   searchBox: {
-    height: 72,
+    height: 74,
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
@@ -42,9 +42,9 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.xl,
     backgroundColor: theme.colors.white,
     shadowColor: theme.colors.black,
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.055,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 9 },
     elevation: 3,
   },
   placeholder: {
