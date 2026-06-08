@@ -32,54 +32,44 @@ type KiertlyItemGridProps = {
   onItemPress: (item: KiertlyGridItem) => void;
 };
 
-function getAvailabilityBadge(item: KiertlyGridItem) {
-  if (item.isAvailable === false) {
-    return { icon: 'pause-circle' as const, text: 'Varattu', isMuted: true };
-  }
-
+function getActionLabel(item: KiertlyGridItem) {
   if (item.highlight.includes('/ päivä') || item.filterCategories?.includes('Vuokraa')) {
-    return { icon: 'tag' as const, text: 'Vuokrattavissa', isMuted: false };
-  }
-
-  if (item.highlight === 'Ilmainen' || item.filterCategories?.includes('Ilmaiset')) {
-    return { icon: 'gift' as const, text: 'Ilmainen', isMuted: false };
+    return 'Vuokraa';
   }
 
   if (item.highlight === 'Vaihda' || item.filterCategories?.includes('Vaihda')) {
-    return { icon: 'repeat' as const, text: 'Vaihdettavissa', isMuted: false };
+    return 'Vaihda';
   }
 
-  return { icon: 'calendar' as const, text: 'Lainattavissa', isMuted: false };
+  if (item.highlight === 'Ilmainen' || item.filterCategories?.includes('Ilmaiset')) {
+    return 'Näytä';
+  }
+
+  return 'Lainaa';
 }
 
-function getLocationText(item: KiertlyGridItem) {
-  return item.locationLabel || 'Sijainti lisäämättä';
+function getValueText(item: KiertlyGridItem) {
+  if (item.isAvailable === false) {
+    return 'Varattu';
+  }
+
+  if (item.highlight === 'Lainaa ilmaiseksi') {
+    return 'Ilmainen';
+  }
+
+  return item.highlight;
 }
 
-function getOwnerName(item: KiertlyGridItem) {
-  return item.ownerName || 'Kiertly-käyttäjä';
+function getPickupText(item: KiertlyGridItem) {
+  if (item.isAvailable === false) {
+    return 'Ei saatavilla';
+  }
+
+  return 'Nouto: Tänään';
 }
 
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join('')
-    .toUpperCase() || 'K';
-}
-
-function KiertlyNearbyHeader() {
-  return (
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>Lähellä sinua</Text>
-      <View style={styles.locationRow}>
-        <Feather name="map-pin" size={20} color={theme.colors.mutedText} strokeWidth={2.2} />
-        <Text style={styles.locationText}>Helsinki • 2 km säteellä</Text>
-      </View>
-    </View>
-  );
+function getDistanceText(index: number) {
+  return `${String((index + 3) / 10).replace('.', ',')} km`;
 }
 
 export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: KiertlyItemGridProps) {
@@ -87,24 +77,27 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
     (item) => activeCategory === 'Kaikki' || item.filterCategories?.includes(activeCategory),
   );
 
-  if (items.length === 0) {
-    return (
-      <View style={styles.feedWrap}>
-        <KiertlyNearbyHeader />
-        <View style={styles.emptySpace} />
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.feedWrap}>
-      <KiertlyNearbyHeader />
-      <View style={styles.list}>
-        {items.map((item) => {
-          const badge = getAvailabilityBadge(item);
-          const ownerName = getOwnerName(item);
+    <View style={styles.sheet}>
+      <View style={styles.handle} />
+      <View style={styles.sheetHeader}>
+        <View>
+          <View style={styles.titleRow}>
+            <Text style={styles.sheetTitle}>Lähellä sinua</Text>
+            <View style={styles.greenDot} />
+          </View>
+          <Text style={styles.sheetSubtitle}>Lainaa, vuokraa, vaihda tai anna. Kaikki läheltä.</Text>
+        </View>
+      </View>
 
-          return (
+      {items.length === 0 ? (
+        <View style={styles.emptyHint}>
+          <Text style={styles.emptyTitle}>Ei vielä tavaroita lähellä</Text>
+          <Text style={styles.emptyText}>Lisää ensimmäinen tavara Jaa-painikkeesta.</Text>
+        </View>
+      ) : (
+        <View style={styles.list}>
+          {items.map((item, index) => (
             <Pressable
               key={item.id}
               accessibilityRole="button"
@@ -115,178 +108,174 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
                 {item.imageUri ? (
                   <Image source={{ uri: item.imageUri }} style={styles.itemPhoto} resizeMode="cover" />
                 ) : (
-                  <Feather name="package" size={46} color={theme.colors.primary} strokeWidth={1.7} />
+                  <Feather name="package" size={36} color={theme.colors.primary} strokeWidth={1.7} />
                 )}
-                {item.isAvailable === false ? <View style={styles.unavailableOverlay} /> : null}
               </View>
 
               <View style={styles.cardBody}>
-                <Text numberOfLines={1} style={styles.title}>{item.title}</Text>
-                <View style={[styles.badge, badge.isMuted && styles.mutedBadge]}>
-                  <Feather name={badge.icon} size={15} color={theme.colors.primary} strokeWidth={2} />
-                  <Text numberOfLines={1} style={styles.badgeText}>{badge.text}</Text>
-                </View>
-                <View style={styles.ownerRow}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{getInitials(ownerName)}</Text>
-                  </View>
-                  <View style={styles.ownerTextWrap}>
-                    <Text numberOfLines={1} style={styles.ownerName}>{ownerName}</Text>
-                    <Text numberOfLines={1} style={styles.itemLocation}>{getLocationText(item)}</Text>
-                  </View>
+                <Text numberOfLines={1} style={styles.itemTitle}>{item.title}</Text>
+                <Text numberOfLines={1} style={styles.itemValue}>{getValueText(item)}</Text>
+                <View style={styles.metaRow}>
+                  <Feather name="map-pin" size={13} color={theme.colors.mutedText} strokeWidth={2} />
+                  <Text style={styles.metaText}>{getDistanceText(index)}</Text>
+                  <Feather name="clock" size={13} color={theme.colors.mutedText} strokeWidth={2} />
+                  <Text numberOfLines={1} style={styles.metaText}>{getPickupText(item)}</Text>
                 </View>
               </View>
 
-              <View style={styles.saveButton}>
+              <View style={styles.rightSide}>
                 <Feather name="heart" size={22} color={theme.colors.text} strokeWidth={1.8} />
+                <View style={styles.actionButton}>
+                  <Text style={styles.actionButtonText}>{getActionLabel(item)}</Text>
+                </View>
               </View>
             </Pressable>
-          );
-        })}
-      </View>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  feedWrap: {
-    paddingHorizontal: 38,
+  sheet: {
+    marginTop: -28,
+    marginHorizontal: theme.spacing.md,
+    paddingTop: 8,
+    paddingHorizontal: theme.spacing.md,
     paddingBottom: 112,
+    borderTopLeftRadius: theme.radius.lg,
+    borderTopRightRadius: theme.radius.lg,
+    backgroundColor: 'rgba(255, 252, 245, 0.96)',
+    shadowColor: theme.colors.black,
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: -5 },
+    elevation: 5,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: theme.spacing.xs,
+  handle: {
+    alignSelf: 'center',
+    width: 54,
+    height: 5,
+    marginBottom: theme.spacing.md,
+    borderRadius: theme.radius.pill,
+    backgroundColor: '#D8D1C4',
+  },
+  sheetHeader: {
     marginBottom: theme.spacing.md,
   },
-  sectionTitle: {
-    color: theme.colors.text,
-    fontSize: 23,
-    fontWeight: '800',
-  },
-  locationRow: {
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
+    gap: theme.spacing.sm,
   },
-  locationText: {
+  sheetTitle: {
+    color: theme.colors.primary,
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.35,
+  },
+  greenDot: {
+    width: 10,
+    height: 10,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primary,
+  },
+  sheetSubtitle: {
+    marginTop: 4,
     color: theme.colors.mutedText,
-    fontSize: 17,
+    fontSize: 14,
     fontWeight: '600',
   },
-  emptySpace: {
-    minHeight: 460,
-  },
-  list: {
-    gap: 0,
-  },
-  card: {
-    minHeight: 154,
-    flexDirection: 'row',
-    overflow: 'hidden',
-    marginBottom: theme.spacing.sm,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.white,
-    shadowColor: theme.colors.black,
-    shadowOpacity: 0.045,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 7 },
-    elevation: 2,
-  },
-  imageWrap: {
-    width: '42%',
-    minHeight: 154,
+  emptyHint: {
+    minHeight: 130,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: theme.spacing.lg,
+  },
+  emptyTitle: {
+    color: theme.colors.text,
+    fontSize: 17,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  emptyText: {
+    marginTop: 4,
+    color: theme.colors.mutedText,
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
+  },
+  list: {
+    gap: 8,
+  },
+  card: {
+    minHeight: 82,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    padding: 7,
+    borderWidth: 1,
+    borderColor: 'rgba(229, 225, 216, 0.82)',
+    borderRadius: theme.radius.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
+  },
+  imageWrap: {
+    width: 96,
+    height: 68,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: theme.radius.sm,
     overflow: 'hidden',
   },
   itemPhoto: {
     width: '100%',
     height: '100%',
   },
-  unavailableOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(31, 36, 24, 0.35)',
-  },
   cardBody: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingVertical: theme.spacing.md,
-    paddingLeft: theme.spacing.md,
-    paddingRight: 48,
-  },
-  title: {
-    color: theme.colors.text,
-    fontSize: 21,
-    fontWeight: '800',
-    letterSpacing: -0.2,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    minHeight: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-    marginTop: theme.spacing.sm,
-    paddingHorizontal: 10,
-    borderRadius: theme.radius.sm,
-    backgroundColor: '#EEF3E4',
-  },
-  mutedBadge: {
-    backgroundColor: '#F3E9E4',
-  },
-  badgeText: {
-    color: theme.colors.text,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  ownerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.sm,
-    marginTop: theme.spacing.md,
-  },
-  avatar: {
-    width: 38,
-    height: 38,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: theme.radius.pill,
-    backgroundColor: '#EEF3E4',
-  },
-  avatarText: {
-    color: theme.colors.primary,
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  ownerTextWrap: {
     flex: 1,
     minWidth: 0,
   },
-  ownerName: {
+  itemTitle: {
     color: theme.colors.text,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
   },
-  itemLocation: {
+  itemValue: {
     marginTop: 2,
+    color: theme.colors.primary,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 6,
+  },
+  metaText: {
     color: theme.colors.mutedText,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
   },
-  saveButton: {
-    position: 'absolute',
-    right: theme.spacing.md,
-    top: '50%',
-    width: 42,
-    height: 42,
+  rightSide: {
+    width: 88,
+    height: 69,
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    minWidth: 74,
+    height: 34,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -21,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.pill,
-    backgroundColor: 'rgba(255, 255, 255, 0.82)',
+    paddingHorizontal: 12,
+    borderRadius: theme.radius.sm,
+    backgroundColor: theme.colors.primary,
+  },
+  actionButtonText: {
+    color: theme.colors.white,
+    fontSize: 14,
+    fontWeight: '800',
   },
 });
