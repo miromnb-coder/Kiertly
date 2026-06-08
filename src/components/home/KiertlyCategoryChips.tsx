@@ -44,10 +44,10 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
     paddingTop: theme.spacing.sm,
-    paddingBottom: theme.spacing.lg,
+    paddingBottom: theme.spacing.sm,
   },
   chip: {
-    height: 45,
+    height: 47,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
