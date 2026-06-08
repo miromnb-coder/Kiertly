@@ -9,53 +9,56 @@ type KiertlySearchBarProps = {
 
 export function KiertlySearchBar({ onPress }: KiertlySearchBarProps) {
   return (
-    <View style={styles.row}>
+    <View style={styles.wrap}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Avaa haku"
         onPress={onPress}
         style={styles.searchBox}
       >
-        <Feather name="search" size={18} color={theme.colors.mutedText} />
-        <Text style={styles.placeholder}>Hae tavaroita tai jäseniä</Text>
+        <Feather name="search" size={28} color={theme.colors.text} strokeWidth={1.9} />
+        <Text numberOfLines={1} style={styles.placeholder}>Hae tavaroita tai jäseniä</Text>
+        <View style={styles.filterButton}>
+          <Feather name="sliders" size={23} color={theme.colors.text} strokeWidth={1.9} />
+        </View>
       </Pressable>
-
-      <View style={styles.iconButton}>
-        <Feather name="bell" size={20} color={theme.colors.primary} />
-      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.sm,
+  wrap: {
     paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.sm,
+    paddingTop: theme.spacing.lg,
+    paddingBottom: theme.spacing.sm,
   },
   searchBox: {
-    flex: 1,
-    height: 42,
+    height: 72,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.sm,
-    paddingHorizontal: 14,
-    borderRadius: theme.radius.md,
-    backgroundColor: '#F1EFE7',
+    gap: theme.spacing.md,
+    paddingLeft: theme.spacing.lg,
+    paddingRight: 8,
+    borderRadius: theme.radius.xl,
+    backgroundColor: theme.colors.white,
+    shadowColor: theme.colors.black,
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 3,
   },
   placeholder: {
+    flex: 1,
     color: theme.colors.mutedText,
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 20,
+    fontWeight: '600',
   },
-  iconButton: {
-    width: 42,
-    height: 42,
+  filterButton: {
+    width: 56,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.radius.pill,
-    backgroundColor: '#F1EFE7',
+    backgroundColor: '#EEF3E4',
   },
 });
