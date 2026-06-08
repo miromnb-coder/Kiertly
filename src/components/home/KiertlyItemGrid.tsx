@@ -3,6 +3,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
 import type { HomeCategory } from './KiertlyCategoryChips';
+import { KiertlyVisualMap } from './KiertlyVisualMap';
 
 export type KiertlyGridItem = {
   id: string;
@@ -78,61 +79,64 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
   );
 
   return (
-    <View style={styles.sheet}>
-      <View style={styles.handle} />
-      <View style={styles.sheetHeader}>
-        <View>
-          <View style={styles.titleRow}>
-            <Text style={styles.sheetTitle}>Lähellä sinua</Text>
-            <View style={styles.greenDot} />
+    <View>
+      <KiertlyVisualMap />
+      <View style={styles.sheet}>
+        <View style={styles.handle} />
+        <View style={styles.sheetHeader}>
+          <View>
+            <View style={styles.titleRow}>
+              <Text style={styles.sheetTitle}>Lähellä sinua</Text>
+              <View style={styles.greenDot} />
+            </View>
+            <Text style={styles.sheetSubtitle}>Lainaa, vuokraa, vaihda tai anna. Kaikki läheltä.</Text>
           </View>
-          <Text style={styles.sheetSubtitle}>Lainaa, vuokraa, vaihda tai anna. Kaikki läheltä.</Text>
         </View>
+
+        {items.length === 0 ? (
+          <View style={styles.emptyHint}>
+            <Text style={styles.emptyTitle}>Ei vielä tavaroita lähellä</Text>
+            <Text style={styles.emptyText}>Lisää ensimmäinen tavara Jaa-painikkeesta.</Text>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {items.map((item, index) => (
+              <Pressable
+                key={item.id}
+                accessibilityRole="button"
+                onPress={() => onItemPress(item)}
+                style={styles.card}
+              >
+                <View style={[styles.imageWrap, { backgroundColor: item.backgroundColor }]}> 
+                  {item.imageUri ? (
+                    <Image source={{ uri: item.imageUri }} style={styles.itemPhoto} resizeMode="cover" />
+                  ) : (
+                    <Feather name="package" size={36} color={theme.colors.primary} strokeWidth={1.7} />
+                  )}
+                </View>
+
+                <View style={styles.cardBody}>
+                  <Text numberOfLines={1} style={styles.itemTitle}>{item.title}</Text>
+                  <Text numberOfLines={1} style={styles.itemValue}>{getValueText(item)}</Text>
+                  <View style={styles.metaRow}>
+                    <Feather name="map-pin" size={13} color={theme.colors.mutedText} strokeWidth={2} />
+                    <Text style={styles.metaText}>{getDistanceText(index)}</Text>
+                    <Feather name="clock" size={13} color={theme.colors.mutedText} strokeWidth={2} />
+                    <Text numberOfLines={1} style={styles.metaText}>{getPickupText(item)}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.rightSide}>
+                  <Feather name="heart" size={22} color={theme.colors.text} strokeWidth={1.8} />
+                  <View style={styles.actionButton}>
+                    <Text style={styles.actionButtonText}>{getActionLabel(item)}</Text>
+                  </View>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        )}
       </View>
-
-      {items.length === 0 ? (
-        <View style={styles.emptyHint}>
-          <Text style={styles.emptyTitle}>Ei vielä tavaroita lähellä</Text>
-          <Text style={styles.emptyText}>Lisää ensimmäinen tavara Jaa-painikkeesta.</Text>
-        </View>
-      ) : (
-        <View style={styles.list}>
-          {items.map((item, index) => (
-            <Pressable
-              key={item.id}
-              accessibilityRole="button"
-              onPress={() => onItemPress(item)}
-              style={styles.card}
-            >
-              <View style={[styles.imageWrap, { backgroundColor: item.backgroundColor }]}> 
-                {item.imageUri ? (
-                  <Image source={{ uri: item.imageUri }} style={styles.itemPhoto} resizeMode="cover" />
-                ) : (
-                  <Feather name="package" size={36} color={theme.colors.primary} strokeWidth={1.7} />
-                )}
-              </View>
-
-              <View style={styles.cardBody}>
-                <Text numberOfLines={1} style={styles.itemTitle}>{item.title}</Text>
-                <Text numberOfLines={1} style={styles.itemValue}>{getValueText(item)}</Text>
-                <View style={styles.metaRow}>
-                  <Feather name="map-pin" size={13} color={theme.colors.mutedText} strokeWidth={2} />
-                  <Text style={styles.metaText}>{getDistanceText(index)}</Text>
-                  <Feather name="clock" size={13} color={theme.colors.mutedText} strokeWidth={2} />
-                  <Text numberOfLines={1} style={styles.metaText}>{getPickupText(item)}</Text>
-                </View>
-              </View>
-
-              <View style={styles.rightSide}>
-                <Feather name="heart" size={22} color={theme.colors.text} strokeWidth={1.8} />
-                <View style={styles.actionButton}>
-                  <Text style={styles.actionButtonText}>{getActionLabel(item)}</Text>
-                </View>
-              </View>
-            </Pressable>
-          ))}
-        </View>
-      )}
     </View>
   );
 }
