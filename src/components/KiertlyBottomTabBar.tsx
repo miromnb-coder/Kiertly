@@ -17,7 +17,7 @@ type KiertlyBottomTabBarProps = {
 };
 
 const tabs: BottomTabItem[] = [
-  { key: 'home', label: 'Etusivu', icon: 'home' },
+  { key: 'home', label: 'Kartta', icon: 'map-pin' },
   { key: 'browse', label: 'Selaa', icon: 'grid' },
   { key: 'share', label: 'Jaa', icon: 'plus' },
   { key: 'messages', label: 'Viestit', icon: 'message-circle' },
