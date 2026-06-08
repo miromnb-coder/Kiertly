@@ -2,23 +2,61 @@ import { Feather } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
+import type { KiertlyGridItem } from './KiertlyItemGrid';
 
-type MapPin = {
-  label: string;
-  icon: keyof typeof Feather.glyphMap;
+type MapPinBase = {
   top: number;
   left: number;
 };
 
-const pins: MapPin[] = [
-  { label: 'Lainaa', icon: 'tool', top: 58, left: 82 },
-  { label: 'Vuokraa', icon: 'umbrella', top: 86, left: 258 },
-  { label: 'Ilmainen', icon: 'gift', top: 156, left: 358 },
-  { label: 'Vaihda', icon: 'repeat', top: 205, left: 48 },
-  { label: 'Lainaa', icon: 'briefcase', top: 250, left: 235 },
+type MapPin = MapPinBase & {
+  label: string;
+  icon: keyof typeof Feather.glyphMap;
+};
+
+const pinPositions: MapPinBase[] = [
+  { top: 56, left: 84 },
+  { top: 95, left: 260 },
+  { top: 150, left: 350 },
+  { top: 214, left: 48 },
+  { top: 248, left: 235 },
+  { top: 316, left: 328 },
 ];
 
-export function KiertlyVisualMap() {
+type KiertlyVisualMapProps = {
+  items?: KiertlyGridItem[];
+};
+
+function getMapPin(item: KiertlyGridItem, index: number): MapPin {
+  const categories = item.filterCategories ?? [];
+  const position = pinPositions[index % pinPositions.length];
+
+  if (item.highlight.includes('/ päivä') || categories.includes('Vuokraa')) {
+    return { ...position, label: 'Vuokraa', icon: 'umbrella' };
+  }
+
+  if (item.highlight === 'Vaihda' || categories.includes('Vaihda')) {
+    return { ...position, label: 'Vaihda', icon: 'repeat' };
+  }
+
+  if (item.highlight === 'Ilmainen' || categories.includes('Ilmaiset')) {
+    return { ...position, label: 'Ilmainen', icon: 'gift' };
+  }
+
+  if (categories.includes('Työkalut')) {
+    return { ...position, label: 'Lainaa', icon: 'tool' };
+  }
+
+  return { ...position, label: 'Lainaa', icon: 'box' };
+}
+
+function getItemCountText(count: number) {
+  return count === 1 ? '1 tavara' : `${count} tavaraa`;
+}
+
+export function KiertlyVisualMap({ items = [] }: KiertlyVisualMapProps) {
+  const visiblePins = items.slice(0, pinPositions.length).map(getMapPin);
+
   return (
     <View style={styles.mapWrap}>
       <View style={[styles.park, styles.parkOne]} />
@@ -27,27 +65,27 @@ export function KiertlyVisualMap() {
       <View style={[styles.waterLine, styles.waterOne]} />
       <View style={[styles.waterLine, styles.waterTwo]} />
 
-      {Array.from({ length: 14 }).map((_, index) => (
+      {Array.from({ length: 16 }).map((_, index) => (
         <View
           key={`road-v-${index}`}
           style={[
             styles.road,
             styles.verticalRoad,
             {
-              left: 18 + index * 36,
+              left: 8 + index * 34,
               transform: [{ rotate: index % 2 === 0 ? '24deg' : '-18deg' }],
             },
           ]}
         />
       ))}
-      {Array.from({ length: 9 }).map((_, index) => (
+      {Array.from({ length: 10 }).map((_, index) => (
         <View
           key={`road-h-${index}`}
           style={[
             styles.road,
             styles.horizontalRoad,
             {
-              top: 28 + index * 38,
+              top: 26 + index * 36,
               transform: [{ rotate: index % 2 === 0 ? '-12deg' : '10deg' }],
             },
           ]}
@@ -58,10 +96,12 @@ export function KiertlyVisualMap() {
         <View style={styles.userDot} />
       </View>
 
-      {pins.map((pin) => (
-        <View key={`${pin.label}-${pin.top}-${pin.left}`} style={[styles.pin, { top: pin.top, left: pin.left }]}> 
-          <Text style={styles.pinLabel}>{pin.label}</Text>
-          <Feather name={pin.icon} size={27} color={theme.colors.white} strokeWidth={2.1} />
+      {visiblePins.map((pin, index) => (
+        <View key={`${pin.label}-${pin.top}-${pin.left}-${index}`} style={[styles.pin, { top: pin.top, left: pin.left }]}> 
+          <View style={styles.pinInner}>
+            <Text style={styles.pinLabel}>{pin.label}</Text>
+            <Feather name={pin.icon} size={27} color={theme.colors.white} strokeWidth={2.1} />
+          </View>
           <View style={styles.pinPoint} />
         </View>
       ))}
@@ -71,7 +111,7 @@ export function KiertlyVisualMap() {
           <Text style={styles.nearbyTitle}>Lähellä sinua</Text>
           <Feather name="map-pin" size={16} color={theme.colors.text} strokeWidth={2} />
         </View>
-        <Text style={styles.nearbyMeta}>14 tavaraa</Text>
+        <Text style={styles.nearbyMeta}>{getItemCountText(items.length)}</Text>
         <Text style={styles.nearbyMeta}>2 km säteellä</Text>
       </View>
     </View>
@@ -80,40 +120,39 @@ export function KiertlyVisualMap() {
 
 const styles = StyleSheet.create({
   mapWrap: {
-    height: 390,
+    flex: 1,
     overflow: 'hidden',
-    marginTop: -3,
     backgroundColor: '#F3EFE5',
   },
   road: {
     position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 255, 0.82)',
+    backgroundColor: 'rgba(255, 255, 255, 0.84)',
   },
   verticalRoad: {
-    top: -70,
+    top: -96,
     width: 4,
-    height: 560,
+    height: 660,
   },
   horizontalRoad: {
-    left: -80,
-    width: 620,
+    left: -98,
+    width: 660,
     height: 4,
   },
   waterLine: {
     position: 'absolute',
-    width: 26,
-    height: 560,
+    width: 25,
+    height: 660,
     borderRadius: theme.radius.pill,
     backgroundColor: 'rgba(155, 196, 213, 0.45)',
   },
   waterOne: {
-    top: -92,
+    top: -120,
     left: 190,
     transform: [{ rotate: '31deg' }],
   },
   waterTwo: {
-    top: -118,
-    left: 300,
+    top: -150,
+    left: 302,
     transform: [{ rotate: '-21deg' }],
     opacity: 0.45,
   },
@@ -123,7 +162,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(187, 205, 159, 0.38)',
   },
   parkOne: {
-    top: 36,
+    top: 38,
     right: 42,
     width: 86,
     height: 64,
@@ -131,26 +170,28 @@ const styles = StyleSheet.create({
   },
   parkTwo: {
     left: 20,
-    bottom: 45,
+    bottom: 190,
     width: 98,
     height: 76,
     transform: [{ rotate: '14deg' }],
   },
   parkThree: {
     right: 128,
-    bottom: 88,
+    bottom: 150,
     width: 74,
     height: 56,
     transform: [{ rotate: '8deg' }],
   },
   userPulse: {
     position: 'absolute',
-    top: 171,
-    left: 207,
+    top: '29%',
+    left: '48%',
     width: 74,
     height: 74,
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: -37,
+    marginTop: -37,
     borderRadius: theme.radius.pill,
     backgroundColor: 'rgba(80, 150, 226, 0.14)',
   },
@@ -174,18 +215,22 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 12,
     backgroundColor: theme.colors.primary,
     shadowColor: theme.colors.black,
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.22,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 7 },
     elevation: 4,
     transform: [{ rotate: '-45deg' }],
+  },
+  pinInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    transform: [{ rotate: '45deg' }],
   },
   pinLabel: {
     marginBottom: 4,
     color: theme.colors.white,
     fontSize: 11,
     fontWeight: '800',
-    transform: [{ rotate: '45deg' }],
   },
   pinPoint: {
     position: 'absolute',
@@ -199,14 +244,14 @@ const styles = StyleSheet.create({
   nearbyCard: {
     position: 'absolute',
     right: 25,
-    bottom: 20,
+    bottom: '42%',
     minWidth: 140,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.radius.md,
     backgroundColor: 'rgba(255, 255, 255, 0.88)',
     shadowColor: theme.colors.black,
-    shadowOpacity: 0.07,
+    shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
     elevation: 3,
