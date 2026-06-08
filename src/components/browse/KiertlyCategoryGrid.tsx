@@ -26,13 +26,13 @@ type BrowseCategory = {
 const categories: BrowseCategory[] = [
   {
     title: 'Työkalut',
-    targetCategory: 'Lainaa',
+    targetCategory: 'Työkalut',
     image: { uri: `${categoryImageBaseUrl}/tools.PNG` },
     backgroundColor: '#F1E8D7',
   },
   {
     title: 'Retkeily',
-    targetCategory: 'Lähellä',
+    targetCategory: 'Tänään',
     image: { uri: `${categoryImageBaseUrl}/camping.PNG` },
     backgroundColor: '#EEF3E4',
   },
@@ -68,7 +68,7 @@ const categories: BrowseCategory[] = [
   },
   {
     title: 'Urheilu',
-    targetCategory: 'Lähellä',
+    targetCategory: 'Tänään',
     image: { uri: `${categoryImageBaseUrl}/sports.PNG` },
     backgroundColor: '#F0E7DA',
   },
