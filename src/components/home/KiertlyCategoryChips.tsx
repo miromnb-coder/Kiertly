@@ -41,20 +41,25 @@ export function KiertlyCategoryChips({
 
 const styles = StyleSheet.create({
   content: {
-    gap: 7,
+    gap: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
     paddingTop: theme.spacing.sm,
-    paddingBottom: theme.spacing.md,
+    paddingBottom: theme.spacing.lg,
   },
   chip: {
-    height: 31,
+    height: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 13,
+    paddingHorizontal: 24,
     borderWidth: 1,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.white,
+    shadowColor: theme.colors.black,
+    shadowOpacity: 0.035,
+    shadowRadius: 9,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 1,
   },
   activeChip: {
     borderColor: theme.colors.primary,
@@ -62,8 +67,8 @@ const styles = StyleSheet.create({
   },
   chipText: {
     color: theme.colors.text,
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '800',
   },
   activeChipText: {
     color: theme.colors.white,
