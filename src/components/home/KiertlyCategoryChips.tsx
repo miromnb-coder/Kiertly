@@ -2,7 +2,7 @@ import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
 import { theme } from '../../constants/theme';
 
-export const homeCategories = ['Kaikki', 'Lainaa', 'Vuokraa', 'Vaihda', 'Ilmaiset', 'Lähellä'] as const;
+export const homeCategories = ['Kaikki', 'Lainaa', 'Vuokraa', 'Ilmaiset', 'Vaihda', 'Tänään', 'Työkalut'] as const;
 
 export type HomeCategory = (typeof homeCategories)[number];
 
@@ -47,10 +47,10 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.lg,
   },
   chip: {
-    height: 50,
+    height: 45,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     borderWidth: 1,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.pill,
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     color: theme.colors.text,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '800',
   },
   activeChipText: {
