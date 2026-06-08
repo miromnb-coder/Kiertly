@@ -32,18 +32,62 @@ type KiertlyItemGridProps = {
   onItemPress: (item: KiertlyGridItem) => void;
 };
 
-function getDisplayMeta(item: KiertlyGridItem) {
-  if (!item.locationLabel) {
-    return item.meta;
+function getAvailabilityBadge(item: KiertlyGridItem) {
+  if (item.isAvailable === false) {
+    return {
+      icon: 'pause-circle' as const,
+      text: 'Varattu',
+      isMuted: true,
+    };
   }
 
-  const methodText = item.meta.split('•')[0]?.trim();
-
-  if (methodText) {
-    return `${methodText} • ${item.locationLabel}`;
+  if (item.highlight.includes('/ päivä') || item.filterCategories?.includes('Vuokraa')) {
+    return {
+      icon: 'tag' as const,
+      text: 'Vuokrattavissa',
+      isMuted: false,
+    };
   }
 
-  return item.locationLabel;
+  if (item.highlight === 'Ilmainen' || item.filterCategories?.includes('Ilmaiset')) {
+    return {
+      icon: 'gift' as const,
+      text: 'Ilmainen',
+      isMuted: false,
+    };
+  }
+
+  if (item.highlight === 'Vaihda' || item.filterCategories?.includes('Vaihda')) {
+    return {
+      icon: 'repeat' as const,
+      text: 'Vaihdettavissa',
+      isMuted: false,
+    };
+  }
+
+  return {
+    icon: 'calendar' as const,
+    text: 'Lainattavissa',
+    isMuted: false,
+  };
+}
+
+function getLocationText(item: KiertlyGridItem) {
+  return item.locationLabel || 'Sijainti lisäämättä';
+}
+
+function getOwnerName(item: KiertlyGridItem) {
+  return item.ownerName || 'Kiertly-käyttäjä';
+}
+
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || 'K';
 }
 
 export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: KiertlyItemGridProps) {
@@ -66,65 +110,115 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
   }
 
   return (
-    <View style={styles.grid}>
-      {items.map((item) => (
-        <Pressable
-          key={item.id}
-          accessibilityRole="button"
-          onPress={() => onItemPress(item)}
-          style={styles.card}
-        >
-          <View style={[styles.image, { backgroundColor: item.backgroundColor }]}> 
-            {item.imageUri ? (
-              <Image source={{ uri: item.imageUri }} style={styles.itemPhoto} resizeMode="cover" />
-            ) : null}
-            {item.isAvailable === false ? (
-              <View style={styles.unavailableOverlay}>
-                <Text style={styles.unavailableText}>Varattu</Text>
-              </View>
-            ) : null}
-            <View style={styles.likesPill}>
-              <Feather name="heart" size={14} color={theme.colors.text} />
-              <Text style={styles.likesText}>{item.likes}</Text>
-            </View>
-          </View>
+    <View style={styles.feedWrap}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Lähellä sinua</Text>
+        <View style={styles.locationRow}>
+          <Feather name="map-pin" size={17} color={theme.colors.mutedText} strokeWidth={2} />
+          <Text style={styles.locationText}>Saatavilla nyt</Text>
+        </View>
+      </View>
 
-          <View style={styles.infoRow}>
-            <View style={styles.textWrap}>
-              <Text numberOfLines={1} style={styles.title}>
-                {item.title}
-              </Text>
-              <Text numberOfLines={1} style={styles.meta}>
-                {getDisplayMeta(item)}
-              </Text>
-              <Text numberOfLines={1} style={styles.highlight}>
-                {item.isAvailable === false ? 'Ei saatavilla juuri nyt' : item.highlight}
-              </Text>
-            </View>
-            <Feather name="more-vertical" size={18} color={theme.colors.text} />
-          </View>
-        </Pressable>
-      ))}
+      <View style={styles.list}>
+        {items.map((item) => {
+          const badge = getAvailabilityBadge(item);
+          const ownerName = getOwnerName(item);
+
+          return (
+            <Pressable
+              key={item.id}
+              accessibilityRole="button"
+              onPress={() => onItemPress(item)}
+              style={styles.card}
+            >
+              <View style={[styles.imageWrap, { backgroundColor: item.backgroundColor }]}> 
+                {item.imageUri ? (
+                  <Image source={{ uri: item.imageUri }} style={styles.itemPhoto} resizeMode="cover" />
+                ) : (
+                  <Feather name="package" size={46} color={theme.colors.primary} strokeWidth={1.7} />
+                )}
+                {item.isAvailable === false ? (
+                  <View style={styles.unavailableOverlay} />
+                ) : null}
+              </View>
+
+              <View style={styles.cardBody}>
+                <Text numberOfLines={1} style={styles.title}>{item.title}</Text>
+
+                <View style={[styles.badge, badge.isMuted && styles.mutedBadge]}>
+                  <Feather name={badge.icon} size={15} color={theme.colors.primary} strokeWidth={2} />
+                  <Text numberOfLines={1} style={styles.badgeText}>{badge.text}</Text>
+                </View>
+
+                <View style={styles.ownerRow}>
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>{getInitials(ownerName)}</Text>
+                  </View>
+                  <View style={styles.ownerTextWrap}>
+                    <Text numberOfLines={1} style={styles.ownerName}>{ownerName}</Text>
+                    <Text numberOfLines={1} style={styles.itemLocation}>{getLocationText(item)}</Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.saveButton}>
+                <Feather name="heart" size={22} color={theme.colors.text} strokeWidth={1.8} />
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    columnGap: 10,
-    rowGap: theme.spacing.lg,
+  feedWrap: {
     paddingHorizontal: theme.spacing.md,
     paddingBottom: 112,
   },
-  card: {
-    width: '48.5%',
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.sm,
   },
-  image: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: theme.radius.sm,
+  sectionTitle: {
+    color: theme.colors.text,
+    fontSize: 21,
+    fontWeight: '800',
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  locationText: {
+    color: theme.colors.mutedText,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  list: {
+    gap: 0,
+  },
+  card: {
+    minHeight: 154,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    marginBottom: theme.spacing.sm,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.white,
+    shadowColor: theme.colors.black,
+    shadowOpacity: 0.045,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 7 },
+    elevation: 2,
+  },
+  imageWrap: {
+    width: '42%',
+    minHeight: 154,
+    alignItems: 'center',
+    justifyContent: 'center',
     overflow: 'hidden',
   },
   itemPhoto: {
@@ -133,65 +227,87 @@ const styles = StyleSheet.create({
   },
   unavailableOverlay: {
     ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(31, 36, 24, 0.45)',
+    backgroundColor: 'rgba(31, 36, 24, 0.35)',
   },
-  unavailableText: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: theme.radius.pill,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    color: theme.colors.text,
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  likesPill: {
-    position: 'absolute',
-    right: 8,
-    bottom: 8,
-    minWidth: 46,
-    height: 31,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    borderRadius: theme.radius.pill,
-    backgroundColor: 'rgba(255, 255, 255, 0.94)',
-  },
-  likesText: {
-    color: theme.colors.text,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 5,
-    paddingTop: 8,
-  },
-  textWrap: {
+  cardBody: {
     flex: 1,
+    justifyContent: 'center',
+    paddingVertical: theme.spacing.md,
+    paddingLeft: theme.spacing.md,
+    paddingRight: 48,
   },
   title: {
     color: theme.colors.text,
+    fontSize: 21,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    minHeight: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    marginTop: theme.spacing.sm,
+    paddingHorizontal: 10,
+    borderRadius: theme.radius.sm,
+    backgroundColor: '#EEF3E4',
+  },
+  mutedBadge: {
+    backgroundColor: '#F3E9E4',
+  },
+  badgeText: {
+    color: theme.colors.text,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  ownerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    marginTop: theme.spacing.md,
+  },
+  avatar: {
+    width: 38,
+    height: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: theme.radius.pill,
+    backgroundColor: '#EEF3E4',
+  },
+  avatarText: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  ownerTextWrap: {
+    flex: 1,
+    minWidth: 0,
+  },
+  ownerName: {
+    color: theme.colors.text,
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  itemLocation: {
+    marginTop: 2,
+    color: theme.colors.mutedText,
     fontSize: 13,
     fontWeight: '600',
   },
-  meta: {
-    marginTop: 3,
-    color: theme.colors.mutedText,
-    fontSize: 11,
-    lineHeight: 14,
-  },
-  highlight: {
-    marginTop: 5,
-    color: theme.colors.primary,
-    fontSize: 12,
-    fontWeight: '700',
+  saveButton: {
+    position: 'absolute',
+    right: theme.spacing.md,
+    top: '50%',
+    width: 42,
+    height: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -21,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.pill,
+    backgroundColor: 'rgba(255, 255, 255, 0.82)',
   },
   emptyState: {
     flex: 1,
