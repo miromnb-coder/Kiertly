@@ -25,8 +25,6 @@ export type KiertlyGridItem = {
   isAvailable?: boolean;
 };
 
-export const kiertlyDefaultItems: KiertlyGridItem[] = [];
-
 type KiertlyItemGridProps = {
   activeCategory: HomeCategory;
   sharedItems: KiertlyGridItem[];
@@ -69,10 +67,6 @@ function getDistanceText(index: number) {
   return `${String((index + 3) / 10).replace('.', ',')} km`;
 }
 
-function getItemCountText(count: number) {
-  return count === 1 ? '1 tavara' : `${count} tavaraa`;
-}
-
 export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: KiertlyItemGridProps) {
   const items = sharedItems.filter(
     (item) => activeCategory === 'Kaikki' || item.filterCategories?.includes(activeCategory),
@@ -85,14 +79,15 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
       <View style={styles.sheet}>
         <View style={styles.handle} />
         <View style={styles.sheetHeader}>
-          <View>
+          <View style={styles.sheetTitleBlock}>
             <View style={styles.titleRow}>
               <Text style={styles.sheetTitle}>Lähellä sinua</Text>
               <View style={styles.greenDot} />
             </View>
-            <Text style={styles.sheetSubtitle}>Lainaa, vuokraa, vaihda tai anna. Kaikki läheltä.</Text>
+            <Text numberOfLines={1} style={styles.sheetSubtitle}>
+              Lainaa, vuokraa, vaihda tai anna. Kaikki läheltä.
+            </Text>
           </View>
-          <Text style={styles.itemCount}>{getItemCountText(items.length)}</Text>
         </View>
 
         <View style={styles.listFrame}>
@@ -157,7 +152,7 @@ const styles = StyleSheet.create({
   },
   sheet: {
     position: 'absolute',
-    top: '47%',
+    top: '51%',
     right: theme.spacing.md,
     bottom: 0,
     left: theme.spacing.md,
@@ -183,11 +178,10 @@ const styles = StyleSheet.create({
   },
   sheetHeader: {
     minHeight: 58,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: theme.spacing.sm,
     marginBottom: 8,
+  },
+  sheetTitleBlock: {
+    minWidth: 0,
   },
   titleRow: {
     flexDirection: 'row',
@@ -211,12 +205,6 @@ const styles = StyleSheet.create({
     color: theme.colors.mutedText,
     fontSize: 14,
     fontWeight: '600',
-  },
-  itemCount: {
-    marginTop: 6,
-    color: theme.colors.primary,
-    fontSize: 12,
-    fontWeight: '800',
   },
   listFrame: {
     flex: 1,
