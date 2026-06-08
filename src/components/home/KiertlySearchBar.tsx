@@ -10,7 +10,7 @@ type KiertlySearchBarProps = {
 
 export function KiertlySearchBar({ onPress }: KiertlySearchBarProps) {
   return (
-    <View>
+    <View style={styles.container}>
       <KiertlyMapTopBar />
       <View style={styles.wrap}>
         <Pressable
@@ -19,8 +19,9 @@ export function KiertlySearchBar({ onPress }: KiertlySearchBarProps) {
           onPress={onPress}
           style={styles.searchBox}
         >
-          <Feather name="search" size={28} color={theme.colors.text} strokeWidth={1.9} />
+          <Feather name="search" size={27} color={theme.colors.text} strokeWidth={1.9} />
           <Text numberOfLines={1} style={styles.placeholder}>Hae tavaroita tai kategorioita</Text>
+          <View style={styles.divider} />
           <View style={styles.filterButton}>
             <Feather name="sliders" size={23} color={theme.colors.text} strokeWidth={1.9} />
           </View>
@@ -31,9 +32,13 @@ export function KiertlySearchBar({ onPress }: KiertlySearchBarProps) {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    zIndex: 2,
+    backgroundColor: theme.colors.background,
+  },
   wrap: {
     paddingHorizontal: 28,
-    paddingTop: theme.spacing.sm,
+    paddingTop: 2,
     paddingBottom: theme.spacing.sm,
   },
   searchBox: {
@@ -43,6 +48,8 @@ const styles = StyleSheet.create({
     gap: theme.spacing.md,
     paddingLeft: theme.spacing.lg,
     paddingRight: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(229, 225, 216, 0.72)',
     borderRadius: theme.radius.xl,
     backgroundColor: theme.colors.white,
     shadowColor: theme.colors.black,
@@ -57,12 +64,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+  divider: {
+    width: 1,
+    height: 42,
+    backgroundColor: 'rgba(229, 225, 216, 0.92)',
+  },
   filterButton: {
     width: 50,
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.radius.pill,
-    backgroundColor: '#EEF3E4',
   },
 });
