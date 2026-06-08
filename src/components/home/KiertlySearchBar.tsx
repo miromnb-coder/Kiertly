@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
+import { KiertlyMapTopBar } from './KiertlyMapTopBar';
 
 type KiertlySearchBarProps = {
   onPress?: () => void;
@@ -9,19 +10,22 @@ type KiertlySearchBarProps = {
 
 export function KiertlySearchBar({ onPress }: KiertlySearchBarProps) {
   return (
-    <View style={styles.wrap}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Avaa haku"
-        onPress={onPress}
-        style={styles.searchBox}
-      >
-        <Feather name="search" size={28} color={theme.colors.text} strokeWidth={1.9} />
-        <Text numberOfLines={1} style={styles.placeholder}>Hae tavaroita tai kategorioita</Text>
-        <View style={styles.filterButton}>
-          <Feather name="sliders" size={23} color={theme.colors.text} strokeWidth={1.9} />
-        </View>
-      </Pressable>
+    <View>
+      <KiertlyMapTopBar />
+      <View style={styles.wrap}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Avaa haku"
+          onPress={onPress}
+          style={styles.searchBox}
+        >
+          <Feather name="search" size={28} color={theme.colors.text} strokeWidth={1.9} />
+          <Text numberOfLines={1} style={styles.placeholder}>Hae tavaroita tai kategorioita</Text>
+          <View style={styles.filterButton}>
+            <Feather name="sliders" size={23} color={theme.colors.text} strokeWidth={1.9} />
+          </View>
+        </Pressable>
+      </View>
     </View>
   );
 }
