@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { theme } from '../../constants/theme';
 import type { HomeCategory } from './KiertlyCategoryChips';
@@ -42,10 +42,6 @@ function getActionLabel(item: KiertlyGridItem) {
     return 'Vaihda';
   }
 
-  if (item.highlight === 'Ilmainen' || item.filterCategories?.includes('Ilmaiset')) {
-    return 'Näytä';
-  }
-
   return 'Lainaa';
 }
 
@@ -58,7 +54,7 @@ function getValueText(item: KiertlyGridItem) {
     return 'Ilmainen';
   }
 
-  return item.highlight;
+  return item.highlight || 'Lainaa';
 }
 
 function getPickupText(item: KiertlyGridItem) {
@@ -73,14 +69,19 @@ function getDistanceText(index: number) {
   return `${String((index + 3) / 10).replace('.', ',')} km`;
 }
 
+function getItemCountText(count: number) {
+  return count === 1 ? '1 tavara' : `${count} tavaraa`;
+}
+
 export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: KiertlyItemGridProps) {
   const items = sharedItems.filter(
     (item) => activeCategory === 'Kaikki' || item.filterCategories?.includes(activeCategory),
   );
 
   return (
-    <View>
-      <KiertlyVisualMap />
+    <View style={styles.mapHome}>
+      <KiertlyVisualMap items={items} />
+
       <View style={styles.sheet}>
         <View style={styles.handle} />
         <View style={styles.sheetHeader}>
@@ -91,82 +92,102 @@ export function KiertlyItemGrid({ activeCategory, sharedItems, onItemPress }: Ki
             </View>
             <Text style={styles.sheetSubtitle}>Lainaa, vuokraa, vaihda tai anna. Kaikki läheltä.</Text>
           </View>
+          <Text style={styles.itemCount}>{getItemCountText(items.length)}</Text>
         </View>
 
-        {items.length === 0 ? (
-          <View style={styles.emptyHint}>
-            <Text style={styles.emptyTitle}>Ei vielä tavaroita lähellä</Text>
-            <Text style={styles.emptyText}>Lisää ensimmäinen tavara Jaa-painikkeesta.</Text>
-          </View>
-        ) : (
-          <View style={styles.list}>
-            {items.map((item, index) => (
-              <Pressable
-                key={item.id}
-                accessibilityRole="button"
-                onPress={() => onItemPress(item)}
-                style={styles.card}
-              >
-                <View style={[styles.imageWrap, { backgroundColor: item.backgroundColor }]}> 
-                  {item.imageUri ? (
-                    <Image source={{ uri: item.imageUri }} style={styles.itemPhoto} resizeMode="cover" />
-                  ) : (
-                    <Feather name="package" size={36} color={theme.colors.primary} strokeWidth={1.7} />
-                  )}
-                </View>
-
-                <View style={styles.cardBody}>
-                  <Text numberOfLines={1} style={styles.itemTitle}>{item.title}</Text>
-                  <Text numberOfLines={1} style={styles.itemValue}>{getValueText(item)}</Text>
-                  <View style={styles.metaRow}>
-                    <Feather name="map-pin" size={13} color={theme.colors.mutedText} strokeWidth={2} />
-                    <Text style={styles.metaText}>{getDistanceText(index)}</Text>
-                    <Feather name="clock" size={13} color={theme.colors.mutedText} strokeWidth={2} />
-                    <Text numberOfLines={1} style={styles.metaText}>{getPickupText(item)}</Text>
+        <View style={styles.listFrame}>
+          {items.length === 0 ? (
+            <View style={styles.emptyHint}>
+              <Text style={styles.emptyTitle}>Ei vielä tavaroita lähellä</Text>
+              <Text style={styles.emptyText}>Lisää ensimmäinen tavara Jaa-painikkeesta.</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={items}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContent}
+              renderItem={({ item, index }) => (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => onItemPress(item)}
+                  style={styles.card}
+                >
+                  <View style={[styles.imageWrap, { backgroundColor: item.backgroundColor }]}> 
+                    {item.imageUri ? (
+                      <Image source={{ uri: item.imageUri }} style={styles.itemPhoto} resizeMode="cover" />
+                    ) : (
+                      <Feather name="package" size={34} color={theme.colors.primary} strokeWidth={1.7} />
+                    )}
                   </View>
-                </View>
 
-                <View style={styles.rightSide}>
-                  <Feather name="heart" size={22} color={theme.colors.text} strokeWidth={1.8} />
-                  <View style={styles.actionButton}>
-                    <Text style={styles.actionButtonText}>{getActionLabel(item)}</Text>
+                  <View style={styles.cardBody}>
+                    <Text numberOfLines={1} style={styles.itemTitle}>{item.title}</Text>
+                    <Text numberOfLines={1} style={styles.itemValue}>{getValueText(item)}</Text>
+                    <View style={styles.metaRow}>
+                      <Feather name="map-pin" size={13} color={theme.colors.mutedText} strokeWidth={2} />
+                      <Text style={styles.metaText}>{getDistanceText(index)}</Text>
+                      <Feather name="clock" size={13} color={theme.colors.mutedText} strokeWidth={2} />
+                      <Text numberOfLines={1} style={styles.metaText}>{getPickupText(item)}</Text>
+                    </View>
                   </View>
-                </View>
-              </Pressable>
-            ))}
-          </View>
-        )}
+
+                  <View style={styles.rightSide}>
+                    <Feather name="heart" size={22} color={theme.colors.text} strokeWidth={1.7} />
+                    <View style={styles.actionButton}>
+                      <Text style={styles.actionButtonText}>{getActionLabel(item)}</Text>
+                    </View>
+                  </View>
+                </Pressable>
+              )}
+            />
+          )}
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  mapHome: {
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+    backgroundColor: '#F3EFE5',
+  },
   sheet: {
-    marginTop: -28,
-    marginHorizontal: theme.spacing.md,
-    paddingTop: 8,
+    position: 'absolute',
+    top: '47%',
+    right: theme.spacing.md,
+    bottom: 0,
+    left: theme.spacing.md,
+    paddingTop: 7,
     paddingHorizontal: theme.spacing.md,
-    paddingBottom: 112,
+    paddingBottom: 92,
     borderTopLeftRadius: theme.radius.lg,
     borderTopRightRadius: theme.radius.lg,
-    backgroundColor: 'rgba(255, 252, 245, 0.96)',
+    backgroundColor: 'rgba(255, 252, 245, 0.97)',
     shadowColor: theme.colors.black,
-    shadowOpacity: 0.06,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: -5 },
-    elevation: 5,
+    shadowOpacity: 0.08,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: -7 },
+    elevation: 6,
   },
   handle: {
     alignSelf: 'center',
     width: 54,
     height: 5,
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
     borderRadius: theme.radius.pill,
     backgroundColor: '#D8D1C4',
   },
   sheetHeader: {
-    marginBottom: theme.spacing.md,
+    minHeight: 58,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: theme.spacing.sm,
+    marginBottom: 8,
   },
   titleRow: {
     flexDirection: 'row',
@@ -191,6 +212,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  itemCount: {
+    marginTop: 6,
+    color: theme.colors.primary,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  listFrame: {
+    flex: 1,
+    minHeight: 0,
+  },
+  listContent: {
+    gap: 8,
+    paddingBottom: theme.spacing.md,
+  },
   emptyHint: {
     minHeight: 130,
     alignItems: 'center',
@@ -210,9 +245,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textAlign: 'center',
   },
-  list: {
-    gap: 8,
-  },
   card: {
     minHeight: 82,
     flexDirection: 'row',
@@ -220,9 +252,9 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
     padding: 7,
     borderWidth: 1,
-    borderColor: 'rgba(229, 225, 216, 0.82)',
+    borderColor: 'rgba(229, 225, 216, 0.88)',
     borderRadius: theme.radius.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.72)',
+    backgroundColor: 'rgba(255, 255, 255, 0.78)',
   },
   imageWrap: {
     width: 96,
